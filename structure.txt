@@ -1,0 +1,13 @@
+punctuality-calculator/
+├── index.html
+├── css/
+│   ├── styles.css
+│   └── animations.css
+├── js/
+│   ├── calculator.js
+│   ├── ui-handlers.js
+│   ├── chart.js
+│   └── report-generator.js
+└── images/
+    ├── favicon.ico
+    └── burning-money.svg

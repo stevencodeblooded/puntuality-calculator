@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Punctuality Profit Calculator</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>How Much Is Being Late Costing You?</h1>
+        <p class="tagline">
+          Calculate the hidden profit you're burning every time you're late
+        </p>
+      </header>
+
+      <main>
+        <div class="calculator-form">
+          <div class="progress-bar-container">
+            <div class="progress-bar">
+              <div class="progress-indicator"></div>
+            </div>
+            <div class="step-indicators">
+              <div class="step active" data-step="1">Your Business</div>
+              <div class="step" data-step="2">Current Metrics</div>
+              <div class="step" data-step="3">Results</div>
+            </div>
+          </div>
+
+          <!-- Step 1: Business Metrics -->
+          <section id="step1" class="step-content active">
+            <h2>Your Business Metrics</h2>
+            
+            <div class="burning-money-animation">
+              <div class="money-time-container">
+                <div class="money-stack">
+                  <div class="money-bill money-bill-1">
+                    <i class="fas fa-dollar-sign"></i>
+                  </div>
+                  <div class="money-bill money-bill-2">
+                    <i class="fas fa-dollar-sign"></i>
+                  </div>
+                  <div class="money-bill money-bill-3">
+                    <i class="fas fa-dollar-sign"></i>
+                  </div>
+                </div>
+                <div class="clock-container">
+                  <div class="clock-face">
+                    <div class="clock-center"></div>
+                    <div class="clock-hand hour-hand"></div>
+                    <div class="clock-hand minute-hand"></div>
+                    <div class="clock-numbers">
+                      <span class="number number-12">12</span>
+                      <span class="number number-3">3</span>
+                      <span class="number number-6">6</span>
+                      <span class="number number-9">9</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flames-container">
+                  <div class="flame flame-1"></div>
+                  <div class="flame flame-2"></div>
+                  <div class="flame flame-3"></div>
+                </div>
+              </div>
+              <p class="animation-caption">Every minute late = profit burned</p>
+            </div>
+
+            <div class="input-group">
+              <label for="averageJobValue">Average Job Value ($)</label>
+              <div class="tooltip">
+                <i class="fas fa-question-circle"></i>
+                <span class="tooltiptext">The average dollar value of each job or contract you complete</span>
+              </div>
+              <input
+                type="number"
+                id="averageJobValue"
+                min="500"
+                max="50000"
+                step="100"
+                value="3000"
+              />
+              <div class="value-display">
+                $<span id="averageJobValueDisplay">3,000</span>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label for="appointmentsPerWeek">Number of Appointments Per Week</label>
+              <div class="tooltip">
+                <i class="fas fa-question-circle"></i>
+                <span class="tooltiptext">How many appointments or estimates you schedule in a typical week</span>
+              </div>
+              <input
+                type="number"
+                id="appointmentsPerWeek"
+                min="1"
+                max="50"
+                step="1"
+                value="10"
+              />
+              <div class="value-display">
+                <span id="appointmentsPerWeekDisplay">10</span> appointments
+              </div>
+            </div>
+
+            <div class="navigation-buttons">
+              <button id="step1Next" class="next-button">
+                Continue <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </section>
+
+          <!-- Step 2: Current Process -->
+          <section id="step2" class="step-content">
+            <h2>Your Current Performance</h2>
+
+            <div class="input-group">
+              <label for="currentCloseRate">Current Close Rate (%)</label>
+              <div class="tooltip">
+                <i class="fas fa-question-circle"></i>
+                <span class="tooltiptext">What percentage of your appointments result in a sale</span>
+              </div>
+              <input
+                type="range"
+                id="currentCloseRate"
+                min="30"
+                max="75"
+                step="1"
+                value="50"
+              />
+              <div class="value-display">
+                <span id="currentCloseRateDisplay">50</span>%
+              </div>
+              <div class="industry-average">Industry Average: 50%</div>
+            </div>
+
+            <div class="input-group">
+              <label for="callbackRate">Average Callback Rate for Late Appointments (%)</label>
+              <div class="tooltip">
+                <i class="fas fa-question-circle"></i>
+                <span class="tooltiptext">What percentage of appointments where you arrive late require a callback or follow-up visit</span>
+              </div>
+              <input
+                type="range"
+                id="callbackRate"
+                min="0"
+                max="100"
+                step="1"
+                value="50"
+              />
+              <div class="value-display">
+                <span id="callbackRateDisplay">50</span>%
+              </div>
+              <div class="industry-average">Industry Average: 50%</div>
+            </div>
+
+            <div class="input-group">
+              <label for="latenessPercentage">Percentage of Appointments You Arrive Late To (%)</label>
+              <div class="tooltip">
+                <i class="fas fa-question-circle"></i>
+                <span class="tooltiptext">How often you arrive later than the promised time window</span>
+              </div>
+              <input
+                type="range"
+                id="latenessPercentage"
+                min="0"
+                max="100"
+                step="1"
+                value="40"
+              />
+              <div class="value-display">
+                <span id="latenessPercentageDisplay">40</span>%
+              </div>
+              <div class="industry-average">Industry Average: 40%</div>
+            </div>
+
+            <div class="social-proof">
+              <div class="social-proof-text">
+                <i class="fas fa-users"></i> 78% of homeowners would pay 15% more for guaranteed punctuality
+              </div>
+              <div class="premium-toggle">
+                <label class="switch">
+                  <input type="checkbox" id="premiumToggle">
+                  <span class="slider round"></span>
+                </label>
+                <span>Show potential premium revenue</span>
+              </div>
+              <div id="premiumRevenue" class="premium-revenue hidden">
+                Potential additional premium revenue: $<span id="premiumRevenueValue">0</span> per year
+              </div>
+            </div>
+
+            <div class="navigation-buttons">
+              <button id="step2Back" class="back-button">
+                <i class="fas fa-arrow-left"></i> Back
+              </button>
+              <button id="calculateButton" class="calculate-button">
+                Calculate My Losses
+              </button>
+            </div>
+          </section>
+
+          <!-- Step 3: Results -->
+          <section id="step3" class="step-content">
+            <div class="calculation-animation">
+              <div class="calculation-progress">
+                <div class="spinner"></div>
+                <div class="burning-money-large">
+                  <i class="fas fa-money-bill-wave"></i>
+                  <div class="flames-large"></div>
+                </div>
+                <p>Calculating your financial losses...</p>
+              </div>
+            </div>
+
+            <div class="results-container">
+              <h2>Your Punctuality Profit Losses</h2>
+
+              <div class="total-cost">
+                <div class="cost-label">
+                  ANNUAL PROFIT INCINERATED:
+                </div>
+                <div class="cost-value">
+                  $<span id="annualLossValue">0</span>
+                </div>
+              </div>
+
+              <div class="time-cost-visualization">
+                <h3>Your Money Is Burning In Real-Time:</h3>
+                <div class="time-cost-meter">
+                  <div class="clock-icon">
+                    <i class="fas fa-clock"></i>
+                  </div>
+                  <div class="burning-rate">
+                    $<span id="hourlyBurnRate">0</span> per hour
+                  </div>
+                  <div class="burning-rate">
+                    $<span id="dailyBurnRate">0</span> per day
+                  </div>
+                  <div class="burning-rate">
+                    $<span id="weeklyBurnRate">0</span> per week
+                  </div>
+                </div>
+              </div>
+
+              <div class="loss-breakdown">
+                <h3>Your Loss Breakdown:</h3>
+                <div class="chart-container">
+                  <canvas id="lossBreakdownChart"></canvas>
+                </div>
+                <div class="loss-categories">
+                  <div class="loss-item">
+                    <div class="loss-icon contract-icon">
+                      <i class="fas fa-file-signature"></i>
+                    </div>
+                    <div class="loss-details">
+                      <div class="loss-label">Lost Contracts</div>
+                      <div class="loss-value">
+                        $<span id="lostRevenueValue">0</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="loss-item">
+                    <div class="loss-icon callback-icon">
+                      <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <div class="loss-details">
+                      <div class="loss-label">Callback Costs</div>
+                      <div class="loss-value">
+                        $<span id="callbackCostValue">0</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="loss-item">
+                    <div class="loss-icon referral-icon">
+                      <i class="fas fa-handshake"></i>
+                    </div>
+                    <div class="loss-details">
+                      <div class="loss-label">Lost Referrals</div>
+                      <div class="loss-value">
+                        $<span id="referralCostValue">0</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="comparison-metrics">
+                <h3>The Big Picture:</h3>
+                <div class="metric-cards">
+                  <div class="metric-card">
+                    <div class="metric-icon">
+                      <i class="fas fa-calendar-week"></i>
+                    </div>
+                    <div class="metric-value">
+                      $<span id="weeklyLossValue">0</span>
+                    </div>
+                    <div class="metric-label">Weekly Profit Burned</div>
+                  </div>
+
+                  <div class="metric-card">
+                    <div class="metric-icon">
+                      <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="metric-value">
+                      $<span id="annualLossCard">0</span>
+                    </div>
+                    <div class="metric-label">Annual Profit Incinerated</div>
+                  </div>
+
+                  <div class="metric-card">
+                    <div class="metric-icon">
+                      <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="metric-value">
+                      $<span id="fiveYearLossValue">0</span>
+                    </div>
+                    <div class="metric-label">Five-Year Financial Inferno</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="opportunity-cost">
+                <h3>What This Money Could Buy Instead:</h3>
+                <div class="opportunity-visualization">
+                  <div class="opportunity-items">
+                    <div class="opportunity-item">
+                      <div class="opportunity-icon">
+                        <i class="fas fa-plane"></i>
+                      </div>
+                      <div class="opportunity-value">
+                        <span id="vacationCount">0</span>
+                      </div>
+                      <div class="opportunity-label">Family Vacations</div>
+                    </div>
+
+                    <div class="opportunity-item">
+                      <div class="opportunity-icon">
+                        <i class="fas fa-truck-pickup"></i>
+                      </div>
+                      <div class="opportunity-value">
+                        <span id="truckPayments">0</span>
+                      </div>
+                      <div class="opportunity-label">Truck Payments</div>
+                    </div>
+
+                    <div class="opportunity-item">
+                      <div class="opportunity-icon">
+                        <i class="fas fa-tools"></i>
+                      </div>
+                      <div class="opportunity-value">
+                        $<span id="toolBudget">0</span>
+                      </div>
+                      <div class="opportunity-label">Tool Budget</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="retirement-calculator">
+                <h3>Your Long-Term Opportunity Cost:</h3>
+                <div class="retirement-visualization">
+                  <p>If you invested your annual punctuality losses at 7% interest:</p>
+                  <div class="retirement-value">
+                    $<span id="retirementValue">0</span>
+                  </div>
+                  <p>in retirement savings after 20 years</p>
+                </div>
+              </div>
+
+              <div class="competitive-edge">
+                <h3>Your Competitive Edge Opportunity:</h3>
+                <div class="competitive-visualization">
+                  <div class="current-vs-potential">
+                    <div class="current-revenue">
+                      <div class="revenue-label">Current</div>
+                      <div class="revenue-value">$<span id="currentRevenueValue">0</span></div>
+                    </div>
+                    <div class="vs-indicator">VS</div>
+                    <div class="potential-revenue">
+                      <div class="revenue-label">Potential with Punctuality</div>
+                      <div class="revenue-value">$<span id="potentialRevenueValue">0</span></div>
+                    </div>
+                  </div>
+                  <div class="edge-description">
+                    <p>You could earn <span id="revenuePercentIncrease">0</span>% more than competitors by implementing a punctuality system</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cta-container">
+                <button id="fixThisButton" class="cta-button pulse-animation">
+                  FIX THIS NOW <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+
+              <div class="navigation-buttons">
+                <button id="step3Back" class="back-button">
+                  <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button id="recalculateButton" class="recalculate-button">
+                  Recalculate
+                </button>
+                <button id="downloadReportButton" class="download-button">
+                  <i class="fas fa-download"></i> Download Report
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- Download Form Modal -->
+      <div id="downloadModal" class="modal">
+        <div class="modal-content">
+          <span class="close-modal">&times;</span>
+          <h2>Download Your Personalized Report</h2>
+          <p>Enter your details to receive your customized punctuality profit report:</p>
+          <form id="downloadForm">
+            <div class="form-group">
+              <label for="userName">Your Name *</label>
+              <input type="text" id="userName" name="userName" required>
+            </div>
+            <div class="form-group">
+              <label for="userEmail">Email Address *</label>
+              <input type="email" id="userEmail" name="userEmail" required>
+            </div>
+            <div class="form-group">
+              <label for="userPhone">Phone Number *</label>
+              <input type="tel" id="userPhone" name="userPhone" required>
+            </div>
+            <div class="form-group">
+              <label for="businessName">Business Name (Optional)</label>
+              <input type="text" id="businessName" name="businessName">
+            </div>
+            <button type="submit" class="submit-button">Download Now</button>
+          </form>
+        </div>
+      </div>
+
+      <footer>
+        <p>© 2025 By Contractors, For Contractors. All rights reserved.</p>
+      </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="js/calculator.js"></script>
+    <script src="js/ui-handlers.js"></script>
+    <script src="js/chart.js"></script>
+    <script src="js/report-generator.js"></script>
+  </body>
+</html>

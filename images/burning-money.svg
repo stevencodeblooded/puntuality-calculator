@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="150" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+    <!-- Money bill -->
+    <rect x="25" y="75" width="150" height="60" rx="5" ry="5" fill="#2e7d32" stroke="#1b5e20" stroke-width="2"/>
+    
+    <!-- Money bill details -->
+    <rect x="40" y="85" width="30" height="30" rx="15" ry="15" fill="#1b5e20" stroke="none"/>
+    <rect x="130" y="85" width="30" height="30" rx="15" ry="15" fill="#1b5e20" stroke="none"/>
+    <rect x="85" y="90" width="30" height="20" rx="2" ry="2" fill="#1b5e20" stroke="none"/>
+    <line x1="35" y1="125" x2="165" y2="125" stroke="#1b5e20" stroke-width="2"/>
+    
+    <!-- Clock face -->
+    <circle cx="100" cy="40" r="30" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+    
+    <!-- Clock details -->
+    <circle cx="100" cy="40" r="3" fill="#1e293b"/>
+    
+    <!-- Clock hands -->
+    <line x1="100" y1="40" x2="100" y2="20" stroke="#1e293b" stroke-width="2">
+        <animateTransform 
+            attributeName="transform" 
+            attributeType="XML" 
+            type="rotate" 
+            from="0 100 40" 
+            to="360 100 40" 
+            dur="60s" 
+            repeatCount="indefinite"/>
+    </line>
+    <line x1="100" y1="40" x2="115" y2="50" stroke="#1e293b" stroke-width="2">
+        <animateTransform 
+            attributeName="transform" 
+            attributeType="XML" 
+            type="rotate" 
+            from="0 100 40" 
+            to="360 100 40" 
+            dur="3600s" 
+            repeatCount="indefinite"/>
+    </line>
+    
+    <!-- Clock numbers -->
+    <text x="100" y="15" text-anchor="middle" fill="#1e293b" font-size="8">12</text>
+    <text x="125" y="40" text-anchor="middle" fill="#1e293b" font-size="8">3</text>
+    <text x="100" y="65" text-anchor="middle" fill="#1e293b" font-size="8">6</text>
+    <text x="75" y="40" text-anchor="middle" fill="#1e293b" font-size="8">9</text>
+    
+    <!-- Flames -->
+    <g>
+        <!-- Small flames -->
+        <path d="M 40,75 Q 50,55 60,75" fill="none" stroke="#f97316" stroke-width="3">
+            <animate attributeName="d" values="M 40,75 Q 50,55 60,75; M 40,75 Q 50,50 60,75; M 40,75 Q 50,60 60,75; M 40,75 Q 50,55 60,75" dur="2s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 90,75 Q 100,55 110,75" fill="none" stroke="#f97316" stroke-width="3">
+            <animate attributeName="d" values="M 90,75 Q 100,55 110,75; M 90,75 Q 100,50 110,75; M 90,75 Q 100,60 110,75; M 90,75 Q 100,55 110,75" dur="1.7s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 140,75 Q 150,55 160,75" fill="none" stroke="#f97316" stroke-width="3">
+            <animate attributeName="d" values="M 140,75 Q 150,55 160,75; M 140,75 Q 150,50 160,75; M 140,75 Q 150,60 160,75; M 140,75 Q 150,55 160,75" dur="1.5s" repeatCount="indefinite"/>
+        </path>
+        
+        <!-- Main flames -->
+        <path d="M 65,75 Q 75,40 85,75" fill="#ef4444" opacity="0.7">
+            <animate attributeName="d" values="M 65,75 Q 75,40 85,75; M 65,75 Q 75,35 85,75; M 65,75 Q 75,45 85,75; M 65,75 Q 75,40 85,75" dur="1.2s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 115,75 Q 125,40 135,75" fill="#ef4444" opacity="0.7">
+            <animate attributeName="d" values="M 115,75 Q 125,40 135,75; M 115,75 Q 125,35 135,75; M 115,75 Q 125,45 135,75; M 115,75 Q 125,40 135,75" dur="1.4s" repeatCount="indefinite"/>
+        </path>
+        
+        <!-- Center flame -->
+        <path d="M 90,75 Q 100,25 110,75" fill="#f97316" opacity="0.8">
+            <animate attributeName="d" values="M 90,75 Q 100,25 110,75; M 90,75 Q 100,20 110,75; M 90,75 Q 100,30 110,75; M 90,75 Q 100,25 110,75" dur="1s" repeatCount="indefinite"/>
+        </path>
+    </g>
+    
+    <!-- Dollar sign for money -->
+    <text x="100" y="110" text-anchor="middle" fill="#ffffff" font-size="24" font-weight="bold">$</text>
+    
+    <!-- Animation timing -->
+    <animate xlink:href="#money" attributeName="opacity" values="1;0.8;1" dur="2s" repeatCount="indefinite"/>
+</svg>

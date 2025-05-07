@@ -1,0 +1,374 @@
+/* Animations for Punctuality Profit Calculator */
+
+/* Spinner Animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Counter Animation */
+@keyframes countUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Section Transitions */
+.step-content {
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.step-content.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Enhanced Burning Money Animation */
+@keyframes flameFlicker {
+    0% { height: 45px; opacity: 0.7; }
+    50% { height: 55px; opacity: 0.8; }
+    100% { height: 65px; opacity: 0.9; }
+}
+
+@keyframes largeFire {
+    0% { opacity: 0.7; height: 50px; }
+    25% { opacity: 0.8; height: 55px; }
+    50% { opacity: 0.9; height: 65px; }
+    75% { opacity: 1; height: 60px; }
+    100% { opacity: 0.9; height: 70px; }
+}
+
+@keyframes moneyBurn {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+
+@keyframes flicker {
+    0% { opacity: 0.5; height: 35px; }
+    25% { opacity: 0.6; height: 40px; }
+    50% { opacity: 0.7; height: 45px; }
+    75% { opacity: 0.8; height: 40px; }
+    100% { opacity: 0.9; height: 50px; }
+}
+
+/* Money Bill Float Animation */
+@keyframes billFloat {
+    0% { transform: translateY(0) rotate(-8deg); opacity: 1; }
+    50% { transform: translateY(-5px) rotate(-5deg); opacity: 0.95; }
+    100% { transform: translateY(0) rotate(-3deg); opacity: 1; }
+}
+
+/* Money Stack Animation */
+@keyframes stackPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Clock Hands Animation */
+@keyframes rotateHourHand {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes rotateMinuteHand {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Money Disappearing Animation */
+@keyframes moneyDisappear {
+    0% { opacity: 1; transform: translateY(0); }
+    50% { opacity: 0.5; transform: translateY(-10px); }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+
+/* Money Bills Sequential Burning */
+.money-bill-1 {
+    animation: billFloat 3s infinite alternate, stackPulse 5s infinite;
+}
+
+.money-bill-2 {
+    animation: billFloat 3.5s infinite alternate 0.2s, stackPulse 5s infinite 0.3s;
+}
+
+.money-bill-3 {
+    animation: billFloat 4s infinite alternate 0.4s, stackPulse 5s infinite 0.6s;
+}
+
+/* Interactive Animation Effect */
+.money-time-container:hover .flame-1,
+.money-time-container:hover .flame-2,
+.money-time-container:hover .flame-3 {
+    height: 80px;
+    opacity: 1;
+    transition: height 0.5s, opacity 0.5s;
+}
+
+.money-time-container:hover .money-bill {
+    animation: moneyDisappear 2s forwards;
+}
+
+.money-time-container:hover .minute-hand {
+    animation-duration: 1s;
+}
+
+/* Loss Item Reveal Animation */
+.loss-item {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.loss-item.animate {
+    animation: revealItem 0.5s forwards;
+}
+
+@keyframes revealItem {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Set sequential delays for loss items */
+.loss-item:nth-child(1).animate { animation-delay: 0.1s; }
+.loss-item:nth-child(2).animate { animation-delay: 0.2s; }
+.loss-item:nth-child(3).animate { animation-delay: 0.3s; }
+
+/* Metric Card Animation */
+.metric-card {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.metric-card.animate {
+    animation: revealItem 0.5s forwards;
+}
+
+.metric-card:nth-child(1).animate { animation-delay: 0.4s; }
+.metric-card:nth-child(2).animate { animation-delay: 0.5s; }
+.metric-card:nth-child(3).animate { animation-delay: 0.6s; }
+
+/* Opportunity Item Animation */
+.opportunity-item {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.opportunity-item.animate {
+    animation: revealItem 0.5s forwards;
+}
+
+.opportunity-item:nth-child(1).animate { animation-delay: 0.7s; }
+.opportunity-item:nth-child(2).animate { animation-delay: 0.8s; }
+.opportunity-item:nth-child(3).animate { animation-delay: 0.9s; }
+
+/* Retirement Value Animation */
+.retirement-value {
+    opacity: 0;
+    transform: scale(0.9);
+}
+
+.retirement-value.animate {
+    animation: scaleUp 0.6s forwards;
+}
+
+@keyframes scaleUp {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Competitive Edge Animation */
+.current-revenue, .potential-revenue {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+.current-revenue.animate {
+    animation: slideRight 0.5s forwards;
+}
+
+.potential-revenue.animate {
+    animation: slideLeft 0.5s forwards;
+    animation-delay: 0.3s;
+}
+
+@keyframes slideRight {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideLeft {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Value Change Animation */
+.value-change {
+    animation: highlightChange 1s ease;
+}
+
+@keyframes highlightChange {
+    0% { background-color: rgba(96, 165, 250, 0.3); }
+    100% { background-color: transparent; }
+}
+
+/* Total Cost Reveal Animation */
+.total-cost {
+    opacity: 0;
+    transform: scale(0.9);
+}
+
+.total-cost.animate {
+    animation: revealTotal 0.8s forwards;
+}
+
+@keyframes revealTotal {
+    0% { opacity: 0; transform: scale(0.9); }
+    60% { transform: scale(1.05); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* Progress Bar Animation */
+@keyframes progressFill {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+/* Pulse Animation for CTA Button */
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(22, 163, 74, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+    }
+}
+
+/* Money Burn Effect for Values */
+.burning-text {
+    position: relative;
+    color: var(--error-color);
+}
+
+.burning-text::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--fire-color), transparent);
+    animation: burn 2s infinite linear;
+}
+
+@keyframes burn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+}
+
+/* Clock Ticking Animation */
+.ticking-clock {
+    animation: tick 1s infinite;
+}
+
+@keyframes tick {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* Modal Animation */
+.modal {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal.show {
+    opacity: 1;
+}
+
+.modal-content {
+    transform: translateY(-50px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.modal.show .modal-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Flame Intensity Animation - scales with values */
+.flames.low {
+    height: 20px;
+    animation: flicker 1s infinite alternate;
+}
+
+.flames.medium {
+    height: 35px;
+    animation: flicker 1.5s infinite alternate;
+}
+
+.flames.high {
+    height: 50px;
+    animation: largeFire 1.5s infinite alternate;
+}
+
+.flames.extreme {
+    height: 70px;
+    animation: largeFire 1s infinite alternate;
+}
+
+/* Chart Animation */
+.chart-animate {
+    animation: fadeInUp 1s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Flying Money Animation */
+@keyframes flyAway {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--fly-x, -100px), var(--fly-y, -100px)) rotate(var(--fly-rotate, -45deg));
+    }
+}
+
+.flying-money {
+    position: absolute;
+    animation: flyAway 2s forwards;
+}
+
+/* Notification Animation */
+.notification {
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}

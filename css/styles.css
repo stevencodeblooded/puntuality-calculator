@@ -1177,6 +1177,10 @@ button {
     visibility: visible;
 }
 
+.modal.show {
+  display: block;
+}
+
 .restore-message {
     background-color: white;
     padding: 2rem;

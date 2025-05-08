@@ -367,18 +367,55 @@ document.addEventListener("DOMContentLoaded", function () {
     const potentialLoss =
       (jobValue * appointments * (latenessPercent / 100)) / 4; // Divide by 4 to scale down
 
-    // Get the flames element
-    const flames = document.querySelector(".flames");
+    // Get the flames elements
+    const flamesContainer = document.querySelector(".flames-container");
+    const flame1 = document.querySelector(".flame-1");
+    const flame2 = document.querySelector(".flame-2");
+    const flame3 = document.querySelector(".flame-3");
+
+    if (!flame1 || !flame2 || !flame3) {
+      return; // Early return if elements don't exist
+    }
 
     // Update flames intensity based on potential loss
     if (potentialLoss < 1000) {
-      flames.className = "flames low";
+      flame1.style.height = "30px";
+      flame2.style.height = "40px";
+      flame3.style.height = "25px";
+      flame1.style.opacity = "0.5";
+      flame2.style.opacity = "0.6";
+      flame3.style.opacity = "0.5";
     } else if (potentialLoss < 5000) {
-      flames.className = "flames medium";
+      flame1.style.height = "40px";
+      flame2.style.height = "60px";
+      flame3.style.height = "35px";
+      flame1.style.opacity = "0.6";
+      flame2.style.opacity = "0.7";
+      flame3.style.opacity = "0.6";
     } else if (potentialLoss < 10000) {
-      flames.className = "flames high";
+      flame1.style.height = "60px";
+      flame2.style.height = "80px";
+      flame3.style.height = "55px";
+      flame1.style.opacity = "0.8";
+      flame2.style.opacity = "0.9";
+      flame3.style.opacity = "0.8";
     } else {
-      flames.className = "flames extreme";
+      flame1.style.height = "80px";
+      flame2.style.height = "100px";
+      flame3.style.height = "75px";
+      flame1.style.opacity = "0.9";
+      flame2.style.opacity = "1";
+      flame3.style.opacity = "0.9";
+    }
+
+    // Also affect the money bills
+    const moneyBills = document.querySelectorAll(".money-bill");
+    if (moneyBills.length > 0) {
+      // Make the money bills move faster with higher values
+      const animationDuration = Math.max(0.5, 3 - potentialLoss / 10000); // Between 0.5s and 3s
+      moneyBills.forEach((bill) => {
+        bill.style.animationDuration = `${animationDuration}s`;
+      });
     }
   }
 

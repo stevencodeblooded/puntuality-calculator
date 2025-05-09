@@ -813,19 +813,21 @@ button {
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
+    overflow: auto; /* Allow scrolling for the entire modal */
     background-color: rgba(0, 0, 0, 0.5);
 }
 
 .modal-content {
     background-color: white;
-    margin: 10% auto;
+    margin: 5% auto; /* Reduced from 10% to 5% to give more vertical space */
     padding: 2rem;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
     max-width: 500px;
     width: 90%;
     position: relative;
+    max-height: 90vh; /* Limit height to 90% of viewport height */
+    overflow-y: auto; /* Enable scrolling within the modal content */
 }
 
 .close-modal {
@@ -853,6 +855,20 @@ button {
     color: var(--medium-dark);
 }
 
+/* Make submit button stick to bottom when scrolling */
+.form-submit-container {
+    position: sticky;
+    bottom: 0;
+    background-color: white;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+/* Add this class to your HTML form */
+.scrollable-form {
+    padding-bottom: 1rem;
+}
+
 .form-group input {
     width: 100%;
     padding: 0.75rem;
@@ -862,6 +878,7 @@ button {
     color: var(--dark);
     outline: none;
     transition: var(--transition);
+    box-sizing: border-box; /* Ensure padding doesn't increase width */
 }
 
 .form-group input:focus {

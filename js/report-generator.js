@@ -41,6 +41,7 @@ function generatePlaceholderPDF() {
     email: "",
     phone: "",
     businessName: "Your Company",
+    city: "Your City",
   };
 
   if (savedContactInfo) {
@@ -52,6 +53,7 @@ function generatePlaceholderPDF() {
       contactInfo.businessName !== "Not provided"
         ? contactInfo.businessName
         : "Your Company";
+    userInfo.city = contactInfo.city || "Your City";
   }
 
   // Get the calculation results
@@ -152,6 +154,9 @@ function generatePlaceholderPDF() {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
   doc.text("Company: " + userInfo.businessName, margin, y);
+  y += lineHeight;
+
+  doc.text("City: " + userInfo.city, margin, y);
   y += lineHeight;
 
   doc.text("Report Date: " + dateStr, margin, y);
@@ -325,10 +330,7 @@ function generatePlaceholderPDF() {
  * @param {Object} results - Calculator results
  */
 function simulateDataSubmission(userInfo, inputs, results) {
-  console.log("Submitting user data to database...");
-
-  // In a real implementation, this would be an API call to store the data
-  // For now, we'll just log to console to indicate this would happen
+  // Simulate data submission
   const dataToSubmit = {
     submissionDate: new Date().toISOString(),
     userInfo: userInfo,

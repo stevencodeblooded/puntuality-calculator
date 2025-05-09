@@ -217,7 +217,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Fix This Now button
     fixThisButton.addEventListener("click", function () {
-      window.open("https://www.ByContractorsForContractors.com", "_blank");
+      window.open(
+        "https://www.ByContractorsForContractors.com/punctuality-pledge",
+        "_blank"
+      );
 
       // Create notification
       showNotification("Redirecting you to the Punctuality Revolution...");
@@ -251,6 +254,7 @@ document.addEventListener("DOMContentLoaded", function () {
         phone: document.getElementById("userPhone").value,
         businessName:
           document.getElementById("businessName").value || "Not provided",
+        city: document.getElementById("city").value,
       };
 
       // Save form data to local storage
@@ -278,6 +282,7 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("userName").value = contactInfo.name || "";
       document.getElementById("userEmail").value = contactInfo.email || "";
       document.getElementById("userPhone").value = contactInfo.phone || "";
+      document.getElementById("city").value = contactInfo.city || "";
       document.getElementById("businessName").value =
         contactInfo.businessName !== "Not provided"
           ? contactInfo.businessName

@@ -1,6 +1,6 @@
 /**
- * UI handlers for the Punctuality Profit Calculator
- * Manages user interactions, form navigation, and updating the DOM
+ * Enhanced UI handlers for the Punctuality Profit Calculator
+ * Added PDF report viewing and Google Sheets integration
  */
 
 // Wait for the DOM to be fully loaded
@@ -76,6 +76,9 @@ document.addEventListener("DOMContentLoaded", function () {
     "revenuePercentIncrease"
   );
 
+  // Create PDF viewer modal elements
+  createPdfViewerModal();
+
   // Initialize tooltips
   initTooltips();
 
@@ -87,6 +90,317 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initialize modal
   initModal();
+
+  /**
+   * Submit form data via email using an iframe approach to prevent page reload
+   * @param {Object} formData - User contact information
+   */
+  function submitViaEmail(formData) {
+    // Get calculator results
+    const results = calculator.results;
+
+    try {
+      // Create a formatted message with all the data
+      const subject = `Punctuality Calculator Submission - ${formData.name}`;
+
+      // Create an invisible iframe to target the form submission
+      const iframe = document.createElement("iframe");
+      iframe.name = "hidden_iframe";
+      iframe.id = "hidden_iframe";
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+
+      // Create a hidden form
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = "https://formsubmit.co/a2e38c53e1da86ac501ca72ce49d6490"; // Your Formspree ID
+      form.style.display = "none";
+      form.target = "hidden_iframe"; // This is the key - target the form submission to the iframe
+
+      // Formspree configuration
+      appendFormField(form, "_subject", subject);
+      appendFormField(form, "_template", "table"); // Uses a nice HTML table format
+      appendFormField(form, "_captcha", "false"); // Disable captcha
+
+      // Add contact info
+      appendFormField(form, "name", formData.name);
+      appendFormField(form, "email", formData.email);
+      appendFormField(form, "phone", formData.phone);
+      appendFormField(form, "businessName", formData.businessName);
+      appendFormField(form, "city", formData.city);
+
+      // Add calculation inputs
+      appendFormField(
+        form,
+        "averageJobValue",
+        `$${calculator.inputs.averageJobValue}`
+      );
+      appendFormField(
+        form,
+        "appointmentsPerWeek",
+        calculator.inputs.appointmentsPerWeek
+      );
+      appendFormField(
+        form,
+        "currentCloseRate",
+        `${calculator.inputs.currentCloseRate}%`
+      );
+      appendFormField(
+        form,
+        "callbackRate",
+        `${calculator.inputs.callbackRate}%`
+      );
+      appendFormField(
+        form,
+        "latenessPercentage",
+        `${calculator.inputs.latenessPercentage}%`
+      );
+
+      // Add calculation results
+      appendFormField(
+        form,
+        "annualLoss",
+        `$${Math.round(results.annualLoss).toLocaleString()}`
+      );
+      appendFormField(
+        form,
+        "weeklyLoss",
+        `$${Math.round(results.weeklyLoss).toLocaleString()}`
+      );
+      appendFormField(
+        form,
+        "dailyBurnRate",
+        `$${Math.round(results.dailyBurnRate).toLocaleString()}`
+      );
+
+      // Don't need _next with iframe approach - form submits in iframe, no redirect happens
+
+      // Append form to document
+      document.body.appendChild(form);
+
+      // Show PDF viewer immediately - don't wait for form submission
+      showPdfViewer();
+
+      // Show notification
+      showNotification("Your custom report is ready to view!");
+
+      // Listen for iframe load event to know when form submission completes
+      iframe.onload = function () {
+        console.log("Form submitted successfully");
+
+        // Clean up the form and iframe after submission
+        setTimeout(() => {
+          if (document.body.contains(form)) document.body.removeChild(form);
+          if (document.body.contains(iframe)) document.body.removeChild(iframe);
+        }, 1000);
+      };
+
+      // Submit the form
+      form.submit();
+    } catch (error) {
+      console.error("Form submission error:", error);
+      showNotification(
+        "There was an issue sending your information. Please try again."
+      );
+
+      // Still show the PDF viewer even if there's an error with the email submission
+      showPdfViewer();
+    }
+  }
+
+  /**
+   * Helper function to append form fields
+   * @param {HTMLFormElement} form - The form element
+   * @param {string} name - Field name
+   * @param {string|number} value - Field value
+   */
+  function appendFormField(form, name, value) {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value || "";
+    form.appendChild(input);
+  }
+
+  /**
+   * Enhanced PDF viewer modal creation
+   * Improves rendering for download and print functionality
+   */
+  function createPdfViewerModal() {
+    // Create PDF viewer modal if it doesn't exist
+    if (!document.getElementById("pdfViewerModal")) {
+      const pdfModal = document.createElement("div");
+      pdfModal.id = "pdfViewerModal";
+      pdfModal.className = "modal pdf-modal";
+
+      pdfModal.innerHTML = `
+      <div class="modal-content pdf-modal-content">
+        <span class="close-modal" id="closePdfModal">&times;</span>
+        <h2>Your Punctuality Profit Report</h2>
+        <div class="pdf-controls">
+          <button id="downloadPdfButton" class="pdf-button">
+            <i class="fas fa-download"></i> Download PDF
+          </button>
+          <button id="printPdfButton" class="pdf-button">
+            <i class="fas fa-print"></i> Print
+          </button>
+        </div>
+        <div class="pdf-container" id="pdfContainer">
+          <!-- PDF content will be loaded here -->
+        </div>
+      </div>
+    `;
+
+      document.body.appendChild(pdfModal);
+
+      // Add event listeners for the PDF modal
+      document
+        .getElementById("closePdfModal")
+        .addEventListener("click", function () {
+          pdfModal.classList.remove("show");
+        });
+
+      document
+        .getElementById("downloadPdfButton")
+        .addEventListener("click", function () {
+          // Generate and download PDF
+          generateAndDownloadPDF();
+        });
+
+      document
+        .getElementById("printPdfButton")
+        .addEventListener("click", function () {
+          // Print the PDF content
+          printReport();
+        });
+
+      // Close modal when clicking outside
+      window.addEventListener("click", function (event) {
+        if (event.target === pdfModal) {
+          pdfModal.classList.remove("show");
+        }
+      });
+
+      // Add improved CSS for PDF viewer modal with better print support
+      const style = document.createElement("style");
+      style.textContent = `
+      .pdf-modal .modal-content {
+        width: 90%;
+        max-width: 1000px;
+        max-height: 90vh;
+        padding: 20px;
+        overflow: hidden;
+      }
+      
+      .pdf-container {
+        overflow-y: auto;
+        max-height: calc(90vh - 120px);
+        margin-top: 20px;
+        padding: 0;
+        background-color: #f5f5f5;
+        box-sizing: border-box;
+      }
+      
+      .pdf-controls {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      
+      .pdf-button {
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      
+      .pdf-button:hover {
+        background-color: #1d4ed8;
+      }
+      
+      .report-page {
+        background-color: white;
+        margin-bottom: 20px;
+        padding: 0.5in;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        width: 8.5in;
+        min-height: 11in;
+        margin-left: auto;
+        margin-right: auto;
+        box-sizing: border-box;
+        page-break-after: always;
+        position: relative;
+      }
+      
+      .report-page:last-child {
+        page-break-after: auto;
+      }
+      
+      /* Fix for image handling */
+      .report-page img {
+        max-width: 100%;
+        height: auto;
+      }
+      
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        
+        #pdfViewerModal, #pdfViewerModal * {
+          visibility: visible;
+        }
+        
+        #pdfViewerModal {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+        }
+        
+        .pdf-modal .modal-content {
+          width: 100% !important;
+          max-width: none !important;
+          max-height: none !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+        
+        .pdf-container {
+          max-height: none !important;
+          overflow: visible !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          background-color: white !important;
+        }
+        
+        .report-page {
+          margin: 0 !important;
+          page-break-after: always;
+          box-shadow: none !important;
+        }
+        
+        .report-page:last-child {
+          page-break-after: auto;
+        }
+        
+        .pdf-controls, .close-modal, h2 {
+          display: none !important;
+        }
+      }
+    `;
+
+      document.head.appendChild(style);
+    }
+  }
 
   /**
    * Initialize tooltip functionality
@@ -260,14 +574,14 @@ document.addEventListener("DOMContentLoaded", function () {
       // Save form data to local storage
       localStorage.setItem("userContactInfo", JSON.stringify(formData));
 
-      // Close modal
+      // Close download modal
       downloadModal.classList.remove("show");
 
-      // Generate report using report-generator.js
-      generatePDFReport();
+      // Submit data via email (this now handles showing the PDF viewer)
+      submitViaEmail(formData);
 
-      // Show confirmation
-      showNotification("Your custom report has been downloaded!");
+      // Note: No need to call showPdfViewer() or showNotification() here
+      // as they're now handled inside submitViaEmail()
     });
   }
 
@@ -291,6 +605,370 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Show the modal
     downloadModal.classList.add("show");
+  }
+
+  /**
+   * Submit form data to Google Sheet
+   * @param {Object} formData - User contact information
+   */
+  function submitToGoogleSheet(formData) {
+    // Get calculator results
+    const results = calculator.results;
+
+    try {
+      // Google Sheet Web App URL - Replace with your deployed Google Apps Script web app URL
+      const scriptURL =
+        "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+
+      // Create form data to send
+      const dataToSend = new FormData();
+
+      // Add contact info
+      dataToSend.append("name", formData.name);
+      dataToSend.append("email", formData.email);
+      dataToSend.append("phone", formData.phone);
+      dataToSend.append("businessName", formData.businessName);
+      dataToSend.append("city", formData.city);
+
+      // Add calculation results
+      dataToSend.append("submitDate", new Date().toISOString());
+      dataToSend.append("averageJobValue", calculator.inputs.averageJobValue);
+      dataToSend.append(
+        "appointmentsPerWeek",
+        calculator.inputs.appointmentsPerWeek
+      );
+      dataToSend.append("currentCloseRate", calculator.inputs.currentCloseRate);
+      dataToSend.append("callbackRate", calculator.inputs.callbackRate);
+      dataToSend.append(
+        "latenessPercentage",
+        calculator.inputs.latenessPercentage
+      );
+      dataToSend.append("annualLoss", results.annualLoss);
+      dataToSend.append("weeklyLoss", results.weeklyLoss);
+
+      // Send the data using fetch
+      fetch(scriptURL, { method: "POST", body: dataToSend })
+        .then((response) => console.log("Success!", response))
+        .catch((error) => console.error("Error!", error.message));
+    } catch (error) {
+      console.log("Form submission error:", error);
+    }
+  }
+
+  /**
+   * Show PDF viewer with report content
+   */
+  function showPdfViewer() {
+    const pdfModal = document.getElementById("pdfViewerModal");
+    const pdfContainer = document.getElementById("pdfContainer");
+
+    try {
+      // Get user information
+      const savedContactInfo = localStorage.getItem("userContactInfo");
+      let userInfo = {
+        name: "Contractor",
+        businessName: "Your Company",
+        city: "Your City",
+      };
+
+      if (savedContactInfo) {
+        const contactInfo = JSON.parse(savedContactInfo);
+        userInfo.name = contactInfo.name || "Contractor";
+        userInfo.businessName =
+          contactInfo.businessName !== "Not provided"
+            ? contactInfo.businessName
+            : "Your Company";
+        userInfo.city = contactInfo.city || "Your City";
+      }
+
+      // Get calculation results
+      const results = calculator.results;
+
+      // Create the complete HTML report using the same function from report-generator.js
+      const reportHTML = createCompleteReportHTML(userInfo, results);
+
+      // Insert into PDF container
+      pdfContainer.innerHTML = reportHTML;
+
+      // Show modal
+      pdfModal.classList.add("show");
+    } catch (error) {
+      console.error("Error generating report preview:", error);
+      showNotification(
+        "Error loading report preview. Please try downloading the PDF directly."
+      );
+    }
+  }
+
+  /**
+   * Replace placeholders in the template with actual values
+   * @param {string} html - The HTML template
+   * @returns {string} - The updated HTML
+   */
+  function replacePlaceholders(html) {
+    // Get user info
+    const userInfo = JSON.parse(
+      localStorage.getItem("userContactInfo") || "{}"
+    );
+    const results = calculator.results;
+
+    // Replace placeholders with actual values
+    let updatedHtml = html
+      .replace(/\[Name\]/g, userInfo.name || "Valued Contractor")
+      .replace(/\[COMPANY NAME\]/g, userInfo.businessName || "Your Company")
+      .replace(/\[city\]/g, userInfo.city || "your city");
+
+    // Replace financial values
+    updatedHtml = updatedHtml
+      .replace(
+        /\[\$XX,XXX\]/g,
+        `$${Math.round(results.annualLoss).toLocaleString()}`
+      )
+      .replace(
+        /\[\$X,XXX\]/g,
+        `$${Math.round(results.annualLoss / 12).toLocaleString()}`
+      )
+      .replace(
+        /\[\$XXX\]/g,
+        `$${Math.round(results.dailyBurnRate).toLocaleString()}`
+      );
+
+    return updatedHtml;
+  }
+
+  /**
+   * Generate and download the PDF report
+   */
+
+  function generateAndDownloadPDF() {
+    // Simply call the enhanced PDF generator
+    generatePDFReport();
+  }
+
+  /**
+   * Create a loading spinner for PDF generation
+   * @returns {HTMLElement} The loading spinner element
+   */
+  function createLoadingSpinner() {
+    const spinner = document.createElement("div");
+    spinner.className = "pdf-loading-spinner";
+    spinner.innerHTML = `
+    <div class="spinner-overlay"></div>
+    <div class="spinner-container">
+      <div class="spinner"></div>
+      <p>Generating your PDF...</p>
+    </div>
+  `;
+
+    // Add inline styles
+    const style = document.createElement("style");
+    style.textContent = `
+    .pdf-loading-spinner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10000;
+    }
+    .spinner-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .spinner-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      margin: 0 auto 10px;
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .spinner-container p {
+      margin: 0;
+      color: #333;
+      font-weight: bold;
+    }
+  `;
+    document.head.appendChild(style);
+
+    return spinner;
+  }
+
+  /**
+   * Prepare content for PDF generation
+   * Apply temporary fixes to improve rendering
+   * @param {HTMLElement} element - The container element
+   */
+  function prepareContentForPDF(element) {
+    // Store original styles to restore later
+    element.dataset.originalOverflow = element.style.overflow || "";
+    element.dataset.originalHeight = element.style.height || "";
+    element.dataset.originalPosition = element.style.position || "";
+
+    // Apply styles that help with PDF generation
+    element.style.overflow = "visible";
+    element.style.height = "auto";
+    element.style.position = "relative";
+
+    // Find all report pages
+    const reportPages = element.querySelectorAll(".report-page");
+
+    // Ensure each page has explicit page breaks
+    reportPages.forEach((page, index) => {
+      // Store original styles
+      page.dataset.originalPageBreak = page.style.pageBreakAfter || "";
+
+      // Set explicit page break after each page except the last
+      if (index < reportPages.length - 1) {
+        page.style.pageBreakAfter = "always";
+      }
+
+      // Ensure proper sizing and margins
+      page.style.width = "8.5in";
+      page.style.minHeight = "11in";
+      page.style.boxSizing = "border-box";
+      page.style.position = "relative";
+      page.style.overflow = "hidden";
+    });
+
+    // Fix image loading issues
+    const images = element.querySelectorAll("img");
+    images.forEach((img) => {
+      if (!img.complete) {
+        img.loading = "eager"; // Force eager loading
+      }
+    });
+  }
+
+  /**
+   * Restore content styles after PDF generation
+   * @param {HTMLElement} element - The container element
+   */
+  function restoreContentAfterPDF(element) {
+    // Restore original styles
+    element.style.overflow = element.dataset.originalOverflow || "";
+    element.style.height = element.dataset.originalHeight || "";
+    element.style.position = element.dataset.originalPosition || "";
+
+    // Find all report pages and restore them
+    const reportPages = element.querySelectorAll(".report-page");
+    reportPages.forEach((page) => {
+      // Restore original page break style
+      page.style.pageBreakAfter = page.dataset.originalPageBreak || "";
+    });
+  }
+
+  /**
+   * Print the report with improved handling
+   */
+  function printReport() {
+    // Get the content container
+    const element = document.getElementById("pdfContainer");
+
+    // Prepare the content for printing
+    prepareContentForPrinting(element);
+
+    // Use a timeout to ensure styles are applied
+    setTimeout(() => {
+      // Open print dialog
+      window.print();
+
+      // Restore content after short delay to allow print dialog to open
+      setTimeout(() => {
+        restoreContentAfterPrinting(element);
+      }, 1000);
+    }, 100);
+  }
+
+  /**
+   * Prepare content for printing
+   * @param {HTMLElement} element - The container element
+   */
+  function prepareContentForPrinting(element) {
+    // Create a style element for print-specific styles
+    const printStyles = document.createElement("style");
+    printStyles.id = "print-specific-styles";
+    printStyles.textContent = `
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #pdfViewerModal, #pdfViewerModal * {
+        visibility: visible;
+      }
+      #pdfViewerModal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+      .pdf-modal .modal-content {
+        width: 100% !important;
+        max-width: none !important;
+        max-height: none !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+      }
+      .pdf-container {
+        max-height: none !important;
+        overflow: visible !important;
+      }
+      .report-page {
+        page-break-after: always;
+        margin: 0 !important;
+        padding: 0.5in !important;
+        box-shadow: none !important;
+      }
+      .report-page:last-child {
+        page-break-after: auto;
+      }
+      .pdf-controls, .close-modal {
+        display: none !important;
+      }
+      h2 {
+        display: none !important;
+      }
+    }
+  `;
+    document.head.appendChild(printStyles);
+
+    // Apply same fixes as PDF generation
+    prepareContentForPDF(element);
+  }
+
+  /**
+   * Restore content after printing
+   * @param {HTMLElement} element - The container element
+   */
+  function restoreContentAfterPrinting(element) {
+    // Remove print styles
+    const printStyles = document.getElementById("print-specific-styles");
+    if (printStyles) {
+      document.head.removeChild(printStyles);
+    }
+
+    // Restore content
+    restoreContentAfterPDF(element);
   }
 
   /**
@@ -716,4 +1394,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Update burning animation on initial load
   updateBurningAnimation();
+
+  // Load necessary libraries dynamically
+  loadLibraries();
 });
+
+/**
+ * Load necessary third-party libraries
+ */
+function loadLibraries() {
+  // Load html2pdf.js if not already loaded
+  if (typeof html2pdf === "undefined") {
+    const script = document.createElement("script");
+    script.src =
+      "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+    document.body.appendChild(script);
+  }
+}

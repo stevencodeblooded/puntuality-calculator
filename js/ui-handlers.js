@@ -1,6 +1,6 @@
 /**
  * Enhanced UI handlers for the Punctuality Profit Calculator
- * Added PDF report viewing and Google Sheets integration
+ * Updated to show report in modal instead of direct download
  */
 
 // Wait for the DOM to be fully loaded
@@ -48,8 +48,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Modal elements
   const downloadModal = document.getElementById("downloadModal");
+  const reportViewModal = document.getElementById("reportViewModal");
   const closeModal = document.querySelector(".close-modal");
+  const closeReportModal = document.querySelector(".close-report-modal");
   const downloadForm = document.getElementById("downloadForm");
+  const printReportButton = document.getElementById("printReportButton");
+  const reportContent = document.getElementById("reportContent");
 
   // Results elements
   const resultsContainer = document.querySelector(".results-container");
@@ -76,9 +80,6 @@ document.addEventListener("DOMContentLoaded", function () {
     "revenuePercentIncrease"
   );
 
-  // Create PDF viewer modal elements
-  createPdfViewerModal();
-
   // Initialize tooltips
   initTooltips();
 
@@ -92,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initModal();
 
   /**
-   * Submit form data via email using an iframe approach to prevent page reload
+   * Submit form data via email and show report in modal
    * @param {Object} formData - User contact information
    */
   function submitViaEmail(formData) {
@@ -113,14 +114,14 @@ document.addEventListener("DOMContentLoaded", function () {
       // Create a hidden form
       const form = document.createElement("form");
       form.method = "POST";
-      form.action = "https://formsubmit.co/a2e38c53e1da86ac501ca72ce49d6490"; // Your Formspree ID
+      form.action = "https://formsubmit.co/a2e38c53e1da86ac501ca72ce49d6490";
       form.style.display = "none";
-      form.target = "hidden_iframe"; // This is the key - target the form submission to the iframe
+      form.target = "hidden_iframe";
 
       // Formspree configuration
       appendFormField(form, "_subject", subject);
-      appendFormField(form, "_template", "table"); // Uses a nice HTML table format
-      appendFormField(form, "_captcha", "false"); // Disable captcha
+      appendFormField(form, "_template", "table");
+      appendFormField(form, "_captcha", "false");
 
       // Add contact info
       appendFormField(form, "name", formData.name);
@@ -173,16 +174,11 @@ document.addEventListener("DOMContentLoaded", function () {
         `$${Math.round(results.dailyBurnRate).toLocaleString()}`
       );
 
-      // Don't need _next with iframe approach - form submits in iframe, no redirect happens
-
       // Append form to document
       document.body.appendChild(form);
 
-      // Show PDF viewer immediately - don't wait for form submission
-      showPdfViewer();
-
       // Show notification
-      showNotification("Your custom report is ready to view!");
+      showNotification("Generating your personalized report...");
 
       // Listen for iframe load event to know when form submission completes
       iframe.onload = function () {
@@ -197,15 +193,725 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Submit the form
       form.submit();
+
+      // Show the report in modal after a short delay
+      setTimeout(() => {
+        showReportInModal(formData, results);
+      }, 500);
     } catch (error) {
       console.error("Form submission error:", error);
       showNotification(
-        "There was an issue sending your information. Please try again."
+        "There was an issue sending your information, but your report is being generated."
       );
 
-      // Still show the PDF viewer even if there's an error with the email submission
-      showPdfViewer();
+      // Still show the report even if there's an error with the email submission
+      setTimeout(() => {
+        showReportInModal(formData, results);
+      }, 500);
     }
+  }
+
+  /**
+   * Show the complete report in a modal
+   * @param {Object} userInfo - User information
+   * @param {Object} results - Calculator results
+   */
+  function showReportInModal(userInfo, results) {
+    // Generate the report HTML
+    const reportHTML = generateReportHTML(userInfo, results);
+
+    // Insert the report into the modal
+    reportContent.innerHTML = reportHTML;
+
+    // Show the modal
+    reportViewModal.classList.add("show");
+
+    // Scroll to top of modal content
+    reportContent.scrollTop = 0;
+
+    showNotification("Your personalized report is ready!");
+  }
+
+  /**
+   * Generate the complete HTML report content
+   * @param {Object} userInfo - User information
+   * @param {Object} results - Calculator results
+   * @returns {string} HTML content for the report
+   */
+  function generateReportHTML(userInfo, results) {
+    // Format the financial values
+    const annualLoss = Math.round(results.annualLoss).toLocaleString();
+    const monthlyLoss = Math.round(results.annualLoss / 12).toLocaleString();
+    const dailyLoss = Math.round(results.dailyBurnRate).toLocaleString();
+    const beforeDollars = Math.round(results.currentRevenue / 1000) + "K";
+    const afterDollars = Math.round(results.potentialRevenue / 1000) + "K";
+
+    return `
+      <!-- PAGE 1 -->
+      <div class="pdf-section">
+        <div style="text-align: center; margin-bottom: 18px">
+          <span style="background: #ffce54; color: #222; font-weight: 700; font-size: 1.45em; padding: 6px 20px 6px 20px; border-radius: 7px; display: inline-block;">
+            Fixing The Trust Problem:
+          </span>
+        </div>
+        <h1 style="text-align: center; color: #14316a; font-size: 1.4em; margin-top: 0; margin-bottom: 18px; font-weight: 700;">
+          The Contractor's No-BS Fix for the Tardiness Trap
+        </h1>
+        <div style="text-align: center; font-weight: bold; letter-spacing: 0.02em; margin-bottom: 12px;">
+          STOP LEAVING MONEY ON THE TABLE
+        </div>
+        <p>Hi <span style="font-weight: bold;">${userInfo.name}</span>, it's great to meet you.</p>
+        <p>Here is your Confidential Financial report from the <em>"How Much Is Being Late Costing You?" calculator.</em></p>
+        <h2 style="text-align: center; color: #14316a; font-size: 1.2em; margin: 15px 0 10px 0; letter-spacing: 0.03em;">
+          THE REAL COST OF BEING LATE
+        </h2>
+        <p>Based on your calculator results, here's what punctuality problems are actually costing <span style="text-transform: uppercase;">${userInfo.businessName}</span>:</p>
+        <div style="font-weight: bold; margin: 18px 0 6px 0">YOUR FINANCIAL BLEEDING:</div>
+        <ul style="font-size: 1.13em; margin-left: 18px">
+          <li><span style="color: #c00; font-weight: bold">${annualLoss}</span> walking out your door EVERY YEAR</li>
+          <li>That's <span style="color: #c00; font-weight: bold">${monthlyLoss}</span> lost EVERY MONTH</li>
+          <li><span style="color: #c00; font-weight: bold">${dailyLoss}</span> slipping away EVERY DAY you don't fix this</li>
+        </ul>
+        <p>This isn't theoretical. This is cash that should be in <strong>YOUR</strong> pocket, based on <strong>YOUR</strong> numbers.</p>
+        <div style="width: 100%; text-align: center; margin: 22px 0 20px 0">
+            <img
+              src="assets/image1.jpg"
+              alt="Contractor financial loss illustration"
+              style="
+                width: 230px;
+                max-width: 100%;
+                box-shadow: 0 2px 7px rgba(0, 0, 0, 0.08);
+              "
+            />
+          </div>
+        <p style="font-size: 1.08em">
+          <strong>Ready to turn that lost cash into real profits,</strong>
+          not by changing <em>what</em> you do, but by simply showing up on
+          time and winning over those clients from the start?
+        </p>
+        <p style="color: #d10000; font-weight: bold; font-size: 1.08em; text-align: center;">
+          Continue reading to see how this fix can improve your profit and
+          reputation!
+        </p>
+        <div class="pdf-footer">
+          <a href="http://www.bycontractorsforcontractors.com/" style="color: white; text-decoration: none;">
+            <span>WWW.BYCONTRACTORSFORCONTRACTORS.COM</span>
+          </a>
+          <a href="mailto:CONTACT@CONSUMERSTRUSTAWARD.COM">
+            <span style="float: right; color: white;">CONTACT@CONSUMERSTRUSTAWARD.COM</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- PAGE 2 -->
+      <div class="page-break"></div>
+      <div class="pdf-section">
+        <h2 style="text-align: center; color: #14316a; font-size: 1.35em; font-weight: bold; margin-top: 0; margin-bottom: 16px;">
+          Stop the Leaks: The Real Damage of Being Late
+        </h2>
+        <div style="width: 100%; text-align: center; margin-bottom: 18px">
+            <img
+              src="assets/image2.jpg"
+              alt="Two contractors at table"
+              style="
+                width: 310px;
+                max-width: 100%;
+                box-shadow: 0 2px 7px rgba(0, 0, 0, 0.08);
+              "
+            />
+          </div>
+        <p>Alright, listen up, you guys. Let's talk about something that's probably costing you more than you even realize: <strong>being late.</strong></p>
+        <p>Yeah, I know, traffic's a bitch, jobs run over, stuff happens. But think of it like this: every minute your crew's not where they're supposed to be, when they're supposed to be, it's like you've got a damn leak in your bucket, and that leak's your hard-earned cash just dripping away.</p>
+        <p>We're not just talking about a pissed-off homeowner tapping their foot. We're talking about <strong>real damage to your bottom line</strong>, damage that can sink your business faster than a poorly poured foundation. Think about it. You show up late for an estimate? Half the time, that potential client's already sour, maybe even called someone else. That's a job you didn't even get a swing at, gone.</p>
+        <p><strong>And even when you <em>do</em> get the job after a late start?</strong> You think they've forgotten? Nope. They're watching you closer, quicker to complain, and way more likely to nickel and dime you on every little thing. That erodes your profit margin faster than acid on concrete.</p>
+        <p>Then there's the domino effect. Late starts push everything else back. You're rushing, your guys are stressed, mistakes happen. And what do mistakes cost? Time, materials, callbacks – more leaks in that damn bucket.</p>
+        <p>So, yeah, being late isn't just a slap on the wrist. <strong>It's a silent killer of your profits, your reputation, and your peace of mind.</strong> It's time we stopped those leaks for good.</p>
+        <div class="pdf-footer">
+          <a href="http://www.bycontractorsforcontractors.com/" style="color: white; text-decoration: none;">
+            <span>WWW.BYCONTRACTORSFORCONTRACTORS.COM</span>
+          </a>
+          <a href="mailto:CONTACT@CONSUMERSTRUSTAWARD.COM">
+            <span style="float: right; color: white;">CONTACT@CONSUMERSTRUSTAWARD.COM</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- PAGE 3 -->
+      <div class="page-break"></div>
+      <div class="pdf-section">
+        <p style="margin-top: 0">
+          <b>Be honest</b>, do any of these
+          <a href="#" style="color: #14316a; text-decoration: underline">sample</a>
+          poor reviews (there are thousands of them) describe your experience?
+        </p>
+        <div style="width: 100%; text-align: center; margin: 20px 0 10px 0">
+            <img
+              src="assets/image3.jpg"
+              alt="Client talking to contractor"
+              style="
+                width: 220px;
+                max-width: 100%;
+                box-shadow: 0 2px 7px rgba(0, 0, 0, 0.08);
+              "
+            />
+          </div>
+
+        <p style="margin-bottom: 2px">
+          <span style="font-size: 1.17em">⭐<span style="color: #bfbfbf">☆☆☆☆</span></span>
+          <span style="font-style: italic">"Absolutely unprofessional! The contractor was scheduled between 9am–11am. By noon, no one had shown up and no call. I wasted my entire morning waiting. Don't bother with this company if you value your time."</span>
+        </p>
+        <p style="margin-bottom: 2px">
+          <span style="font-size: 1.17em">⭐<span style="color: #bfbfbf">☆☆☆☆</span></span>
+          <span style="font-style: italic">"Extremely disappointed with the lack of punctuality. They confirmed 2pm, and it's now 3:30pm with no sign of them. I had to leave work early for this. Looking for a more reliable contractor."</span>
+        </p>
+        <p style="margin-bottom: 2px">
+          <span style="font-size: 1.17em">⭐<span style="color: #bfbfbf">☆☆☆☆</span></span>
+          <span style="font-style: italic">"This contractor was a no-show for our initial consultation. No call, no email, nothing. If they can't even be on time for a simple appointment, I have zero confidence in their ability to manage a project."</span>
+        </p>
+        <p style="margin-bottom: 2px">
+          <span style="font-size: 1.17em">⭐<span style="color: #bfbfbf">☆☆☆☆</span></span>
+          <span style="font-style: italic">"Waited around for over three hours. When I finally called, they acted like it was no big deal and said they were 'running a bit behind.' A 'bit behind' is not three hours! My entire afternoon is now shot."</span>
+        </p>
+        <p style="margin-top: 1.3em; margin-bottom: 0.2em">
+          <b>And I really hope this wasn't you.</b>
+          This was posted on a community form in your area:
+        </p>
+        <p style="margin-bottom: 0.2em"><em>Hi all,</em></p>
+        <p>
+          <em>I wanted to warn everyone about the contractor that I tried to use for a small bathroom remodel, Ver.. Tile - Taylor Anthony Tr..... Below is a copy of the <b><span style="font-style: normal">complaint I filed with the Better Business Bureau</span></b> ~……….. </em>
+        </p>
+        <div class="pdf-footer">
+          <a href="http://www.bycontractorsforcontractors.com/" style="color: white; text-decoration: none;">
+            <span>WWW.BYCONTRACTORSFORCONTRACTORS.COM</span>
+          </a>
+          <a href="mailto:CONTACT@CONSUMERSTRUSTAWARD.COM">
+            <span style="float: right; color: white;">CONTACT@CONSUMERSTRUSTAWARD.COM</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- PAGE 4 -->
+      <div class="page-break"></div>
+      <div class="pdf-section">
+        <h2 style="text-align: center; color: #14316a; font-size: 1.35em; font-weight: bold; margin-top: 0; margin-bottom: 16px;">
+          From Late & Losing to On-Time & Winning: How We Fixed This Mess
+        </h2>
+        <div style="width: 100%; text-align: center; margin-bottom: 18px">
+            <div style="display: inline-block; position: relative">
+              <img
+                src="assets/image4.jpg"
+                alt="Before and After contractors"
+                style="
+                  width: 320px;
+                  max-width: 100%;
+                  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.08);
+                "
+              />
+              <span
+                style="
+                  position: absolute;
+                  top: 8px;
+                  left: 24px;
+                  color: #fff;
+                  font-weight: bold;
+                  font-size: 1.1em;
+                  text-shadow: 0 1px 4px #222;
+                "
+              ></span>
+              <span
+                style="
+                  position: absolute;
+                  top: 8px;
+                  right: 24px;
+                  color: #fff;
+                  font-weight: bold;
+                  font-size: 1.1em;
+                  text-shadow: 0 1px 4px #222;
+                "
+              ></span>
+            </div>
+          </div>
+        <p>Okay, so we've all been there, right? Late, scrambling, losing money and sleep over this damn lateness problem. But here's the thing: <b>we're contractors. We're problem-solvers.</b> We don't just whine about a busted pipe; we fix it. And that's exactly what we did with this appointment mess.</p>
+        <p><b>A bunch of us got together</b> – guys who were sick of the same old BS – and we hammered out a system. Not some fancy software that costs more than a new truck, but a real, practical way to get to our appointments on time, get our crews where they need to be, when they need to be there, without all the headaches.</p>
+        <p>And <b>a way to establish INSTANT trust with our first appointment</b>, and leave that appointment with an agreement and a 5-Star review.</p>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%; margin: 0 auto;">
+        <div style="font-weight: bold; color: #2381c3; margin: 26px 0 8px 0; font-size: 1.13em; letter-spacing: 0.01em;">
+          WHAT HAPPENS WHEN YOU FIX THIS <span style="color: #3dc475; text-decoration: underline;">ONE</span> THING
+        </div>
+        <ul style="font-size: 1.12em; margin-left: 0; margin-bottom: 0; list-style: none; padding: 0; text-align: left; display: inline-block;">
+          <li style="margin-bottom: 4px; list-style: none;">
+            <span style="color: #23b44b; font-size: 1.15em">&#x2705;</span>
+            Average annual revenue increase: <span style="font-weight: 700; color: #267849">$37,500</span>
+          </li>
+          <li style="margin-bottom: 4px; list-style: none;">
+            <span style="color: #23b44b; font-size: 1.15em">&#x2705;</span>
+            Average increase in referrals: <span style="font-weight: 700; color: #267849">32%</span>
+          </li>
+          <li style="margin-bottom: 4px; list-style: none;">
+            <span style="color: #23b44b; font-size: 1.15em">&#x2705;</span>
+            Average reduction in negative reviews: <span style="font-weight: 700; color: #267849">91%</span>
+          </li>
+          <li style="list-style: none;">
+            <span style="color: #23b44b; font-size: 1.15em">&#x2705;</span>
+            Average increase in pricing: <span style="font-weight: 700; color: #267849">17%</span>
+          </li>
+        </ul>
+      </div>
+        <div class="pdf-footer">
+          <a href="http://www.bycontractorsforcontractors.com/" style="color: white; text-decoration: none;">
+            <span>WWW.BYCONTRACTORSFORCONTRACTORS.COM</span>
+          </a>
+          <a href="mailto:CONTACT@CONSUMERSTRUSTAWARD.COM">
+            <span style="float: right; color: white;">CONTACT@CONSUMERSTRUSTAWARD.COM</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- PAGE 5 -->
+      <div class="page-break"></div>
+        <div class="pdf-section" style="padding-bottom: 82px">
+          <p style="margin-top: 0; font-weight: bold">
+            By simply <span style="color: #2381c3">FIXING</span> this
+            <span style="color: #3dc475">ONE</span> thing…..
+          </p>
+          <blockquote
+            style="
+              font-style: italic;
+              margin-left: 32px;
+              margin-right: 32px;
+              color: #23272c;
+              margin-top: 7px;
+            "
+          >
+            "Finally, a contractor who shows up when they say they will! Not
+            only were they on time, but they called ahead to confirm. The work
+            was excellent, but I was most impressed by their professionalism and
+            respect for my schedule."
+            <br /><br />
+            "I've hired 5 different contractors this year, and this is the only
+            one who was actually punctual. I'll gladly pay their higher rates
+            for the peace of mind and reliability. Already recommended to three
+            neighbors."
+          </blockquote>
+          <p style="margin-top: 18px">
+            This isn’t rocket science, but it's about getting the basics nailed
+            down so tight that lateness just isn't an option anymore. It's about
+            taking control of our time, our reputation, and our damn businesses.
+            And guess what? <b>It works.</b>
+          </p>
+          <p
+            style="
+              margin-top: 28px;
+              color: #3dc475;
+              font-weight: 700;
+              text-align: center;
+              font-size: 1.12em;
+            "
+          >
+            See the Payoff:
+          </p>
+          <p
+            style="
+              color: #14316a;
+              font-weight: 700;
+              font-size: 1.1em;
+              text-align: center;
+              margin-bottom: 0.2em;
+            "
+          >
+            Real Contractors Building Trust (and Bank Accounts) with This System
+          </p>
+           <p style="font-size: 1.09em; text-align: center; font-weight: bold; margin-top: 0;">
+          Converting your <span style="color: #d10000">${beforeDollars}</span> into
+          <span style="color: #3dc475">${afterDollars}</span> more income
+        </p>
+          <div style="width: 100%; margin: 18px 0 0 0">
+            <div
+              style="display: flex; align-items: flex-start; margin-bottom: 7px"
+            >
+              <img
+                src="assets/contractor1.jpg"
+                alt="Contractor testimonial"
+                style="
+                  width: 56px;
+                  height: 56px;
+                  border-radius: 50%;
+                  margin-right: 14px;
+                  object-fit: cover;
+                  flex-shrink: 0;
+                "
+              />
+              <span style="font-style: italic">
+                "After implementing the
+                <b>Insanely Great Appointment System</b>, our appointment
+                reliability improved from 72% to 98%. Customer callbacks
+                increased 43% and we've documented a 17% revenue increase in
+                just 90 days." John Martinez, Electrical Contractor – Riverside,
+                CA
+              </span>
+            </div>
+            <div style="margin-bottom: 7px">
+              <span style="font-style: italic">
+                "We were leaving money on the table with every late appointment.
+                The Revolution changed everything – we now have the highest
+                punctuality rating in our market and it's become our main
+                competitive advantage." Sarah Wilson, Painting Contractor –
+                Atlanta, GA
+              </span>
+            </div>
+            <div
+              style="display: flex; align-items: flex-start; margin-bottom: 7px"
+            >
+              <img
+                src="assets/contractor2.jpg"
+                alt="Contractor testimonial"
+                style="
+                  width: 56px;
+                  height: 56px;
+                  border-radius: 50%;
+                  margin-right: 14px;
+                  object-fit: cover;
+                  flex-shrink: 0;
+                "
+              />
+              <span style="font-style: italic">
+                "I've been in business 17 years. I thought I knew everything
+                about running jobs. When another contractor told me about this
+                punctuality system, I laughed it off. What could I possibly
+                learn about showing up to appointments? Six months later, my
+                close rate is up 21%, callbacks are down 64%, and I've added
+                $11,200 in monthly revenue. I'm not laughing anymore." — Mike
+                D., Plumbing & Heating, Boston
+              </span>
+            </div>
+            <div style="display: flex; align-items: flex-start">
+              <img
+                src="assets/contractor3.jpg"
+                alt="Contractor testimonial"
+                style="
+                  width: 56px;
+                  height: 56px;
+                  border-radius: 50%;
+                  margin-right: 14px;
+                  object-fit: cover;
+                  flex-shrink: 0;
+                "
+              />
+              <span style="font-style: italic">
+                "Since implementing the
+                <b>Insanely Great Appointment System</b>, we’ve seen immediate
+                impacts on our bottom line. Customers notice the difference, and
+                our team appreciates the positive feedback from the customers."
+                -Larry D, Remodeling, Heber
+              </span>
+            </div>
+          </div>
+          <div class="pdf-footer">
+            <a href="http://www.bycontractorsforcontractors.com/" style="color: white; text-decoration: none;">
+                <span>WWW.BYCONTRACTORSFORCONTRACTORS.COM</span>
+            </a>
+            <a href="mailto:CONTACT@CONSUMERSTRUSTAWARD.COM">
+                <span style="float: right; color: white;">CONTACT@CONSUMERSTRUSTAWARD.COM</span>
+            </a>
+          </div>
+        </div>
+
+      <!-- PAGE 6 -->
+      <div class="page-break"></div>
+      <div class="pdf-section">
+        <div style="display: flex; align-items: flex-start; margin-bottom: 11px">
+          <img
+              src="assets/contractor1.jpg"
+              alt="Contractor portrait"
+              style="
+                width: 56px;
+                height: 56px;
+                border-radius: 50%;
+                margin-right: 16px;
+                object-fit: cover;
+                flex-shrink: 0;
+              "
+            />
+          <span style="font-style: italic; color: #23272c">
+            "I've been running service calls for 13 years and thought I had my
+            schedule dialed in. My guys laughed when I mentioned trying a new
+            punctuality system – we were all skeptical. But after our first
+            month using the system, our callback rate dropped 37% and we
+            increased our average ticket by $118. The unexpected benefit? My
+            guys are home for dinner every night now because they're not
+            running late on final calls. That alone has cut my turnover
+            problem in half."
+            <span style="font-weight: bold; color: #23272c">
+              James K., Electrical Contractor, 3-truck operation, Dallas</span>
+          </span>
+        </div>
+        <div style="display: flex; align-items: flex-start; margin-bottom: 13px">
+           <img
+              src="assets/contractor4.jpg"
+              alt="Contractor portrait"
+              style="
+                width: 56px;
+                height: 56px;
+                border-radius: 50%;
+                margin-right: 16px;
+                object-fit: cover;
+                flex-shrink: 0;
+              "
+            />
+          <span style="font-style: italic; color: #23272c">
+            "As a female contractor in a male-dominated field, I'm always
+            looking for legitimate advantages. I tried this system because my
+            estimators were constantly running behind, and homeowners were
+            complaining. Within 3 weeks, our close rate jumped from 42% to 58%
+            – that's an extra $27,400 in monthly revenue. The part that
+            shocked me? Our 5-star review count doubled when we started
+            sending the 'on my way' texts. Now my competitors are wondering
+            why we're getting all the high-end jobs."
+            <span style="font-weight: bold; color: #23272c">
+              Maria S., Roofing Contractor, 12 employees, Chicago, IL</span>
+          </span>
+        </div>
+        <p style="margin-bottom: 11px">
+          <span style="color: #d10000; font-weight: bold">And get this:</span>
+          7 out of 10 homeowners said they'd pay 15% <em>more</em> for a
+          contractor who's on time! 15%! That's free money we're leaving on
+          the table.
+        </p>
+        <p style="font-weight: bold; margin-bottom: 12px">
+          <span style="color: #14316a">Now, seriously, can you honestly</span>
+          tell me you <em>don't</em> want to be the trusted contractor? You
+          <em>don't</em> want to earn more? This isn't about changing your
+          business; it's about being on time, building trust, and earning
+          more. <span style="font-size: 1.1em">😊</span>
+        </p>
+
+        <h3 style="text-align: center; color: #14316a; font-size: 1.13em; font-weight: bold; margin-bottom: 4px; margin-top: 35px;">
+          As a Contractor Who's Seen Enough Lost Profit,<br />
+          Isn't It Time to Try the Fix?
+        </h3>
+        <div style="margin-bottom: 11px">
+          Ready to ditch the late fees and finally run a tight ship?
+        </div>
+        <div style="margin-bottom: 10px">
+          This isn't just about showing up on time. It's about mastering that
+          first client meeting, building trust from the jump, and landing the
+          job (and that 5-star review) more often.
+        </div>
+        <div style="font-weight: bold">
+          <span style="color: #23272c">
+            This system is so straightforward, you can grab it today and start
+            seeing results tomorrow.
+          </span>
+        </div>
+        <div class="pdf-footer">
+          <a href="http://www.bycontractorsforcontractors.com/" style="color: white; text-decoration: none;">
+            <span>WWW.BYCONTRACTORSFORCONTRACTORS.COM</span>
+          </a>
+          <a href="mailto:CONTACT@CONSUMERSTRUSTAWARD.COM">
+            <span style="float: right; color: white;">CONTACT@CONSUMERSTRUSTAWARD.COM</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- PAGE 7 -->
+      <div class="page-break"></div>
+      <div class="pdf-section">
+        <h2 style="color: #d10000; text-align: center">WHAT YOU GET TODAY</h2>
+        <p>The <strong>Insanely Great Appointment System</strong> includes:</p>
+        <ul style="list-style: none; padding-left: 0; font-size: 1.08em">
+          <li><span style="color: green">&#x2705;</span> <strong>The Punctuality Promise - "The On-Time Guarantee:</strong> Give them this on-time guarantee when you make the appointment and win their trust immediately</li>
+          <li><span style="color: green">&#x2705;</span> <strong>Automated Text Template:</strong> Use this to confirm your appointment. Another trust builder</li>
+          <li><span style="color: green">&#x2705;</span> <strong>The Trust Trigger Checklist</strong> – the 4 actions in the first 90 seconds that build maximum trust</li>
+          <li><span style="color: green">&#x2705;</span> <strong>Paper Schedule System (For Non-Digital Users):</strong> Formatted as a clipboard-ready sheet. If you are 'tech savvy' it can easily be digitized.</li>
+          <li><span style="color: green">&#x2705;</span> <strong>Pre-Appointment Checklist - "The 5-Point Preparation Protocol"</strong> – Use this the night before so you can sleep better knowing you are prepared for tomorrow</li>
+          <li><span style="color: green">&#x2705;</span> <strong>30 Minutes Before Departure:</strong> Check these items to make sure you are prepared to arrive on time</li>
+          <li><span style="color: green">&#x2705;</span> <strong>Trust-Building Script</strong> – What to say during your appointment that makes them feel they can trust you and need not get other bids. The closer <span style="font-size: 1.2em">😊</span></li>
+          <li><span style="color: green">&#x2705;</span> <strong>The Trust Builder Bid Sheet</strong> – It improves communication and eliminates mis-communication. This is your golden ticket to more money and higher profits</li>
+          <li><span style="color: green">&#x2705;</span> <strong>Feedback about your punctuality and communication</strong> – This earns you your 'Punctuality Trust Badge' and 5-star reviews. Why not get your review now <span style="font-size: 1.2em">😊</span></li>
+          <li><span style="color: green">&#x2705;</span> <strong>One-Touch Review Generator:</strong> A simple card with a QR code given at the end of a punctual appointment that takes customers directly to a review page (optional)</li>
+        </ul>
+        <div class="pdf-footer">
+          <a href="http://www.bycontractorsforcontractors.com/" style="color: white; text-decoration: none;">
+            <span>WWW.BYCONTRACTORSFORCONTRACTORS.COM</span>
+          </a>
+          <a href="mailto:CONTACT@CONSUMERSTRUSTAWARD.COM">
+            <span style="float: right; color: white;">CONTACT@CONSUMERSTRUSTAWARD.COM</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- PAGE 8 -->
+      <div class="page-break"></div>
+      <div class="pdf-section">
+        <div style="text-align: center; margin-bottom: 12px">
+            <img
+              src="assets/image8.jpg"
+              alt="Punctuality Trust Badge Logo"
+              style="width: 340px; max-width: 95%; margin-bottom: 10px"
+            />
+          </div>
+        <p>Show up on time, consistently, for 30 days, and you'll earn the <strong>'Punctuality Trust Badge'</strong> - something over <strong>1,500</strong> of us now proudly display.</p>
+        <p style="margin-bottom: 9px">Think about this:</p>
+        <p style="margin-bottom: 13px">
+          <strong>The 'Punctuality Trust Badge' – Your Instant Credibility Booster.</strong>
+          After 30 days of running your business like a PRO with these tools
+          and showing you're hitting your times, you get this badge. Slap it
+          on your website, your cards, your truck – everywhere. It's a
+          flashing neon sign to other contractors and every homeowner out
+          there: <strong>'This is a contractor who doesn't screw around with your time.'</strong>
+          That trust? That's what gets you the job.
+        </p>
+        <div style="display: flex; align-items: flex-start; margin-bottom: 10px">
+          <img
+              src="assets/contractor3.jpg"
+              alt="profile"
+              style="
+                width: 56px;
+                height: 56px;
+                border-radius: 50%;
+                margin-right: 16px;
+                object-fit: cover;
+                flex-shrink: 0;
+              "
+            />
+          <div style="flex: 1">
+            <p style="margin: 0 0 10px 0; font-style: italic">
+              "I'll be straight with you guys, I used to be the poster child
+              for 'contractor time.' You know the drill: showing up late,
+              half-apologizing, the whole nine yards. I didn't think it was a
+              huge deal, but then I started noticing jobs slipping away.
+              Clients seemed hesitant, always asking about timelines upfront,
+              real cautious-like.
+            </p>
+          </div>
+        </div>
+        <p style="margin: 0 0 10px 0; font-style: italic">
+          <strong>This Punctuality Trust Badge?</strong> That changed everything.
+        </p>
+        <p style="margin: 0 0 10px 0; font-style: italic">
+          The first month, I made a conscious effort to be on time, every
+          single damn time. It wasn't always easy, but I stuck with the
+          system. And you know what? It worked.
+        </p>
+        <p style="margin: 0 0 10px 0; font-style: italic">
+          After 30 days, I got that badge, slapped it on my truck and my
+          website. It wasn't long until clients started treating me different
+          – more respect, less haggling. They actually believed what I said.
+        </p>
+        <p style="margin: 0 0 10px 0; font-style: italic">
+          Jobs that I would've lost before? I was landing them. People were
+          saying things like, 'It was a nice change to have a contractor show
+          up when they said they would.' Referrals went through the roof.
+        </p>
+        <p style="margin: 0 0 10px 0; font-style: italic">
+          Bottom line? That badge isn't just a gimmick. It's a sign that
+          you're a pro, a guy who values their time and their word. And in
+          this business, that's worth more than any fancy tool.
+          <strong>Earning that badge was one of the best things I ever did for my business."</strong>
+        </p>
+        <p style="margin: 0">- Tom R., Remodeling Contractor</p>
+        <div class="pdf-footer">
+          <a href="http://www.bycontractorsforcontractors.com/" style="color: white; text-decoration: none;">
+            <span>WWW.BYCONTRACTORSFORCONTRACTORS.COM</span>
+          </a>
+          <a href="mailto:CONTACT@CONSUMERSTRUSTAWARD.COM">
+            <span style="float: right; color: white;">CONTACT@CONSUMERSTRUSTAWARD.COM</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- PAGE 9 -->
+      <div class="page-break"></div>
+      <div class="pdf-section">
+        <div style="text-align: center">
+          <span style="background: #ffce54; color: #222; font-weight: 700; font-size: 1.2em; padding: 6px 18px; border-radius: 6px; display: inline-block; margin-bottom: 10px;">
+            Your Chance to Be One of the Few:
+          </span>
+        </div>
+        <h2 style="text-align: center; color: #31649b; font-size: 1.55em; margin: 0 0 16px 0;">
+          Claim Your Spot to Become the Trusted Go-To
+        </h2>
+        <div style="display: flex; align-items: flex-start; margin-bottom: 10px">
+          <img
+              src="assets/contractor1.jpg"
+              alt="profile"
+              style="
+                width: 56px;
+                height: 56px;
+                border-radius: 50%;
+                margin-right: 16px;
+                object-fit: cover;
+                flex-shrink: 0;
+              "
+            />
+          <div style="flex: 1">
+            <p style="font-style: italic; margin: 0; color: #262626; text-align: center;">
+              "This simple system put an extra $20K in my pocket in the first
+              three months, just by getting to our appointments when we said
+              we would and building that trust. Seriously."
+            </p>
+          </div>
+        </div>
+        <p>
+          Alright, listen up. Look, I get it. Maybe being on time and actually
+          building a solid rep around here in ${userInfo.city} isn't your top concern right now.
+          You're busy, things are hectic. I'm not gonna lie, this isn't for
+          everyone.
+        </p>
+        <p>
+          But if you're sick of chasing your tail, losing out on jobs because
+          folks don't trust you to show up, and you're ready to be
+          <em>the</em> go-to, reliable contractor in ${userInfo.city}? Then listen close.
+        </p>
+        <p>
+          Right now, we're opening up spots for
+          <strong>just five more contractors</strong> – trying to keep a good
+          mix of plumbers, sparkies, carpenters, remodelers, decks the whole
+          nine yards – to join the growing crew of punctual, trusted
+          professionals in ${userInfo.city}. This isn't a free
+          ride, but it's the real deal.
+        </p>
+        <p style="font-weight: 700; color: #31649b; margin-top: 18px">Today only:</p>
+        <p style="margin-bottom: 0.3em">
+          <strong>First off, a handshake guarantee:</strong> Purchase and take
+          the <em>Insanely Great Appointment System</em> for a 10-day spin. If
+          you look at it and think, 'Nah, this isn't gonna work for my crew,'
+          just holler and we'll refund your damn money. No BS, no hard
+          feelings.
+        </p>
+        <p style="margin-bottom: 0.3em">
+          <strong>But here's where it gets real interesting:</strong> Once
+          you're hitting those on-time first appointments consistently and
+          you've earned that 'Punctuality Trust Badge' – and believe me, over
+          1,500 of us have already snagged one –
+          <strong>you're getting plugged into something big</strong>. We're
+          building a serious marketing push right here in ${userInfo.city} to promote the contractors who've
+          earned that badge. Think of it as us shouting from the rooftops that
+          you're the reliable son-of-a-gun to call.
+          <strong>Homeowners in ${userInfo.city} get a clear list
+          of trusted contractors, the ones who actually show up.</strong>
+          It's like having your number on their speed dial for every job they
+          need that you do. Short-term gigs, long-term referrals – this thing
+          builds a pipeline that just keeps on giving.
+        </p>
+        <p style="font-size: 1.15em; text-align: center">
+          <span style="color: #888; text-decoration: line-through">$295.00</span>, today $195.00
+        </p>
+        <p style="margin-top: 16px; text-align: center">
+          <a href="https://buy.stripe.com/8x2cN5gJR1Z4faifTHes000" style="color: #31649b; font-weight: 700; text-decoration: underline;">
+            CLICK HERE TO PURCHASE
+          </a>
+        </p>
+        <div class="pdf-footer">
+          <a href="http://www.bycontractorsforcontractors.com/" style="color: white; text-decoration: none;">
+            <span>WWW.BYCONTRACTORSFORCONTRACTORS.COM</span>
+          </a>
+          <a href="mailto:CONTACT@CONSUMERSTRUSTAWARD.COM">
+            <span style="float: right; color: white;">CONTACT@CONSUMERSTRUSTAWARD.COM</span>
+          </a>
+        </div>
+      </div>
+    `;
   }
 
   /**
@@ -223,183 +929,241 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /**
-   * Enhanced PDF viewer modal creation
-   * Improves rendering for download and print functionality
+   * Print the report content
    */
-  function createPdfViewerModal() {
-    // Create PDF viewer modal if it doesn't exist
-    if (!document.getElementById("pdfViewerModal")) {
-      const pdfModal = document.createElement("div");
-      pdfModal.id = "pdfViewerModal";
-      pdfModal.className = "modal pdf-modal";
+  /**
+   * Print the report content with properly positioned footers
+   */
+  function printReport() {
+    // Create a new window for printing
+    const printWindow = window.open("", "_blank");
 
-      pdfModal.innerHTML = `
-      <div class="modal-content pdf-modal-content">
-        <span class="close-modal" id="closePdfModal">&times;</span>
-        <h2>Your Punctuality Profit Report</h2>
-        <div class="pdf-controls">
-          <button id="downloadPdfButton" class="pdf-button">
-            <i class="fas fa-download"></i> Download PDF
-          </button>
-          <button id="printPdfButton" class="pdf-button">
-            <i class="fas fa-print"></i> Print
-          </button>
-        </div>
-        <div class="pdf-container" id="pdfContainer">
-          <!-- PDF content will be loaded here -->
-        </div>
-      </div>
-    `;
+    // Get the report content and process it for printing
+    let reportHTML = reportContent.innerHTML;
 
-      document.body.appendChild(pdfModal);
+    // Split the content by pdf-section divs to ensure each page has its footer
+    const sections = reportHTML.split('<div class="pdf-section');
+    let processedHTML = "";
 
-      // Add event listeners for the PDF modal
-      document
-        .getElementById("closePdfModal")
-        .addEventListener("click", function () {
-          pdfModal.classList.remove("show");
-        });
+    sections.forEach((section, index) => {
+      if (index === 0 && !section.includes("pdf-footer")) {
+        // Skip if it's just the content before the first section
+        return;
+      }
 
-      document
-        .getElementById("downloadPdfButton")
-        .addEventListener("click", function () {
-          // Generate and download PDF
-          generateAndDownloadPDF();
-        });
+      if (section.trim()) {
+        // Reconstruct the section
+        let sectionHTML = '<div class="pdf-section' + section;
 
-      document
-        .getElementById("printPdfButton")
-        .addEventListener("click", function () {
-          // Print the PDF content
-          printReport();
-        });
-
-      // Close modal when clicking outside
-      window.addEventListener("click", function (event) {
-        if (event.target === pdfModal) {
-          pdfModal.classList.remove("show");
+        // Ensure each section has a footer if it doesn't already
+        if (!sectionHTML.includes("pdf-footer")) {
+          // Find where to insert the footer (before the closing div)
+          const lastDivIndex = sectionHTML.lastIndexOf("</div>");
+          if (lastDivIndex !== -1) {
+            const footerHTML = `
+                      <div class="pdf-footer">
+                          <a href="http://www.bycontractorsforcontractors.com/" style="color: white; text-decoration: none;">
+                              <span>WWW.BYCONTRACTORSFORCONTRACTORS.COM</span>
+                          </a>
+                          <a href="mailto:CONTACT@CONSUMERSTRUSTAWARD.COM">
+                              <span style="float: right; color: white;">CONTACT@CONSUMERSTRUSTAWARD.COM</span>
+                          </a>
+                      </div>`;
+            sectionHTML =
+              sectionHTML.slice(0, lastDivIndex) +
+              footerHTML +
+              sectionHTML.slice(lastDivIndex);
+          }
         }
-      });
 
-      // Add improved CSS for PDF viewer modal with better print support
-      const style = document.createElement("style");
-      style.textContent = `
-      .pdf-modal .modal-content {
-        width: 90%;
-        max-width: 1000px;
-        max-height: 90vh;
-        padding: 20px;
-        overflow: hidden;
+        processedHTML += sectionHTML;
       }
-      
-      .pdf-container {
-        overflow-y: auto;
-        max-height: calc(90vh - 120px);
-        margin-top: 20px;
-        padding: 0;
-        background-color: #f5f5f5;
-        box-sizing: border-box;
-      }
-      
-      .pdf-controls {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 10px;
-      }
-      
-      .pdf-button {
-        background-color: #2563eb;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 4px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 14px;
-        font-weight: 500;
-      }
-      
-      .pdf-button:hover {
-        background-color: #1d4ed8;
-      }
-      
-      .report-page {
-        background-color: white;
-        margin-bottom: 20px;
-        padding: 0.5in;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        width: 8.5in;
-        min-height: 11in;
-        margin-left: auto;
-        margin-right: auto;
-        box-sizing: border-box;
-        page-break-after: always;
-        position: relative;
-      }
-      
-      .report-page:last-child {
-        page-break-after: auto;
-      }
-      
-      /* Fix for image handling */
-      .report-page img {
-        max-width: 100%;
-        height: auto;
-      }
-      
-      @media print {
-        body * {
-          visibility: hidden;
+    });
+
+    // Create the print document with optimized styles
+    printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Punctuality Report</title>
+      <style>
+        /* Reset and base styles */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
         }
         
-        #pdfViewerModal, #pdfViewerModal * {
-          visibility: visible;
+        body {
+          font-family: Georgia, serif;
+          color: #000;
+          padding: 0;
+          margin: 0;
+          line-height: 1.5;
+          background: #fff;
         }
         
-        #pdfViewerModal {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
+        /* Page setup */
+        @page {
+          size: letter;
+          margin: 0;
         }
         
-        .pdf-modal .modal-content {
-          width: 100% !important;
-          max-width: none !important;
-          max-height: none !important;
-          padding: 0 !important;
-          margin: 0 !important;
-        }
-        
-        .pdf-container {
-          max-height: none !important;
-          overflow: visible !important;
-          padding: 0 !important;
-          margin: 0 !important;
-          background-color: white !important;
-        }
-        
-        .report-page {
-          margin: 0 !important;
+        /* PDF Section - using flexbox for reliable footer positioning */
+        .pdf-section {
+          width: 8.5in;
+          min-height: 11in;
+          max-height: 11in;
+          padding: 0.75in;
+          padding-bottom: 1.5in; /* Extra space for footer */
+          position: relative;
           page-break-after: always;
-          box-shadow: none !important;
+          page-break-inside: avoid;
+          display: flex;
+          flex-direction: column;
         }
         
-        .report-page:last-child {
+        .pdf-section:last-child {
           page-break-after: auto;
         }
         
-        .pdf-controls, .close-modal, h2 {
+        /* Content wrapper to push footer to bottom */
+        .pdf-section > *:not(.pdf-footer) {
+          flex: 1 1 auto;
+        }
+        
+        /* Footer styles - positioned at bottom of each page */
+        .pdf-footer {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background-color: #4a80d4 !important;
+          color: white !important;
+          padding: 15px 0.75in;
+          display: flex !important;
+          justify-content: space-between !important;
+          align-items: center !important;
+          font-size: 11px !important;
+          font-weight: bold !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+        }
+        
+        .pdf-footer a {
+          color: white !important;
+          text-decoration: none !important;
+        }
+        
+        .pdf-footer span {
+          color: white !important;
+          display: inline-block !important;
+        }
+        
+        /* Typography */
+        h1, h2, h3 {
+          margin-top: 18px;
+          margin-bottom: 10px;
+          font-weight: bold;
+          line-height: 1.15;
+          page-break-after: avoid;
+          color: #14316a;
+        }
+        
+        h1 {
+          font-size: 2em;
+        }
+        
+        h2 {
+          font-size: 1.35em;
+        }
+        
+        h3 {
+          font-size: 1.13em;
+        }
+        
+        p {
+          margin: 0.5em 0;
+          orphans: 3;
+          widows: 3;
+        }
+        
+        ul, li {
+          break-inside: avoid;
+          page-break-inside: avoid;
+          margin-top: 0.5em;
+          margin-bottom: 0.5em;
+        }
+        
+        blockquote {
+          margin: 1em 2em;
+          font-style: italic;
+          color: #23272c;
+        }
+        
+        /* Images */
+        img {
+          max-width: 100%;
+          height: auto;
+          page-break-inside: avoid;
+        }
+        
+        /* Links in content */
+        a:not(.pdf-footer a) {
+          color: #14316a;
+          text-decoration: underline;
+        }
+        
+        /* Hide page break indicators */
+        .page-break {
           display: none !important;
         }
-      }
-    `;
+        
+        /* Utility classes */
+        strong {
+          font-weight: bold;
+        }
+        
+        em {
+          font-style: italic;
+        }
+        
+        /* Ensure last page footer is visible */
+        @media print {
+          .pdf-section {
+            position: relative !important;
+          }
+          
+          .pdf-footer {
+            position: absolute !important;
+            bottom: 0 !important;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      ${processedHTML}
+    </body>
+    </html>
+  `);
 
-      document.head.appendChild(style);
-    }
+    printWindow.document.close();
+
+    // Wait for content to load completely before printing
+    printWindow.onload = function () {
+      // Additional delay to ensure styles are applied
+      setTimeout(() => {
+        printWindow.print();
+
+        // Close the window after printing (with delay for some browsers)
+        setTimeout(() => {
+          printWindow.close();
+        }, 100);
+      }, 250);
+    };
   }
 
   /**
@@ -535,9 +1299,12 @@ document.addEventListener("DOMContentLoaded", function () {
         "https://www.ByContractorsForContractors.com/punctuality-pledge",
         "_blank"
       );
-
-      // Create notification
       showNotification("Redirecting you to the Punctuality Revolution...");
+    });
+
+    // Print Report button
+    printReportButton.addEventListener("click", function () {
+      printReport();
     });
   }
 
@@ -545,15 +1312,23 @@ document.addEventListener("DOMContentLoaded", function () {
    * Initialize modal functionality
    */
   function initModal() {
-    // Close modal when X is clicked
+    // Close download modal when X is clicked
     closeModal.addEventListener("click", function () {
       downloadModal.classList.remove("show");
     });
 
-    // Close modal when clicking outside the modal content
+    // Close report modal when X is clicked
+    closeReportModal.addEventListener("click", function () {
+      reportViewModal.classList.remove("show");
+    });
+
+    // Close modals when clicking outside the modal content
     window.addEventListener("click", function (event) {
       if (event.target === downloadModal) {
         downloadModal.classList.remove("show");
+      }
+      if (event.target === reportViewModal) {
+        reportViewModal.classList.remove("show");
       }
     });
 
@@ -577,11 +1352,8 @@ document.addEventListener("DOMContentLoaded", function () {
       // Close download modal
       downloadModal.classList.remove("show");
 
-      // Submit data via email (this now handles showing the PDF viewer)
+      // Submit data via email and show report in modal
       submitViaEmail(formData);
-
-      // Note: No need to call showPdfViewer() or showNotification() here
-      // as they're now handled inside submitViaEmail()
     });
   }
 
@@ -605,370 +1377,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Show the modal
     downloadModal.classList.add("show");
-  }
-
-  /**
-   * Submit form data to Google Sheet
-   * @param {Object} formData - User contact information
-   */
-  function submitToGoogleSheet(formData) {
-    // Get calculator results
-    const results = calculator.results;
-
-    try {
-      // Google Sheet Web App URL - Replace with your deployed Google Apps Script web app URL
-      const scriptURL =
-        "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
-
-      // Create form data to send
-      const dataToSend = new FormData();
-
-      // Add contact info
-      dataToSend.append("name", formData.name);
-      dataToSend.append("email", formData.email);
-      dataToSend.append("phone", formData.phone);
-      dataToSend.append("businessName", formData.businessName);
-      dataToSend.append("city", formData.city);
-
-      // Add calculation results
-      dataToSend.append("submitDate", new Date().toISOString());
-      dataToSend.append("averageJobValue", calculator.inputs.averageJobValue);
-      dataToSend.append(
-        "appointmentsPerWeek",
-        calculator.inputs.appointmentsPerWeek
-      );
-      dataToSend.append("currentCloseRate", calculator.inputs.currentCloseRate);
-      dataToSend.append("callbackRate", calculator.inputs.callbackRate);
-      dataToSend.append(
-        "latenessPercentage",
-        calculator.inputs.latenessPercentage
-      );
-      dataToSend.append("annualLoss", results.annualLoss);
-      dataToSend.append("weeklyLoss", results.weeklyLoss);
-
-      // Send the data using fetch
-      fetch(scriptURL, { method: "POST", body: dataToSend })
-        .then((response) => console.log("Success!", response))
-        .catch((error) => console.error("Error!", error.message));
-    } catch (error) {
-      console.log("Form submission error:", error);
-    }
-  }
-
-  /**
-   * Show PDF viewer with report content
-   */
-  function showPdfViewer() {
-    const pdfModal = document.getElementById("pdfViewerModal");
-    const pdfContainer = document.getElementById("pdfContainer");
-
-    try {
-      // Get user information
-      const savedContactInfo = localStorage.getItem("userContactInfo");
-      let userInfo = {
-        name: "Contractor",
-        businessName: "Your Company",
-        city: "Your City",
-      };
-
-      if (savedContactInfo) {
-        const contactInfo = JSON.parse(savedContactInfo);
-        userInfo.name = contactInfo.name || "Contractor";
-        userInfo.businessName =
-          contactInfo.businessName !== "Not provided"
-            ? contactInfo.businessName
-            : "Your Company";
-        userInfo.city = contactInfo.city || "Your City";
-      }
-
-      // Get calculation results
-      const results = calculator.results;
-
-      // Create the complete HTML report using the same function from report-generator.js
-      const reportHTML = createCompleteReportHTML(userInfo, results);
-
-      // Insert into PDF container
-      pdfContainer.innerHTML = reportHTML;
-
-      // Show modal
-      pdfModal.classList.add("show");
-    } catch (error) {
-      console.error("Error generating report preview:", error);
-      showNotification(
-        "Error loading report preview. Please try downloading the PDF directly."
-      );
-    }
-  }
-
-  /**
-   * Replace placeholders in the template with actual values
-   * @param {string} html - The HTML template
-   * @returns {string} - The updated HTML
-   */
-  function replacePlaceholders(html) {
-    // Get user info
-    const userInfo = JSON.parse(
-      localStorage.getItem("userContactInfo") || "{}"
-    );
-    const results = calculator.results;
-
-    // Replace placeholders with actual values
-    let updatedHtml = html
-      .replace(/\[Name\]/g, userInfo.name || "Valued Contractor")
-      .replace(/\[COMPANY NAME\]/g, userInfo.businessName || "Your Company")
-      .replace(/\[city\]/g, userInfo.city || "your city");
-
-    // Replace financial values
-    updatedHtml = updatedHtml
-      .replace(
-        /\[\$XX,XXX\]/g,
-        `$${Math.round(results.annualLoss).toLocaleString()}`
-      )
-      .replace(
-        /\[\$X,XXX\]/g,
-        `$${Math.round(results.annualLoss / 12).toLocaleString()}`
-      )
-      .replace(
-        /\[\$XXX\]/g,
-        `$${Math.round(results.dailyBurnRate).toLocaleString()}`
-      );
-
-    return updatedHtml;
-  }
-
-  /**
-   * Generate and download the PDF report
-   */
-
-  function generateAndDownloadPDF() {
-    // Simply call the enhanced PDF generator
-    generatePDFReport();
-  }
-
-  /**
-   * Create a loading spinner for PDF generation
-   * @returns {HTMLElement} The loading spinner element
-   */
-  function createLoadingSpinner() {
-    const spinner = document.createElement("div");
-    spinner.className = "pdf-loading-spinner";
-    spinner.innerHTML = `
-    <div class="spinner-overlay"></div>
-    <div class="spinner-container">
-      <div class="spinner"></div>
-      <p>Generating your PDF...</p>
-    </div>
-  `;
-
-    // Add inline styles
-    const style = document.createElement("style");
-    style.textContent = `
-    .pdf-loading-spinner {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 10000;
-    }
-    .spinner-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-    .spinner-container {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-      text-align: center;
-    }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
-      border-radius: 50%;
-      margin: 0 auto 10px;
-      animation: spin 2s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .spinner-container p {
-      margin: 0;
-      color: #333;
-      font-weight: bold;
-    }
-  `;
-    document.head.appendChild(style);
-
-    return spinner;
-  }
-
-  /**
-   * Prepare content for PDF generation
-   * Apply temporary fixes to improve rendering
-   * @param {HTMLElement} element - The container element
-   */
-  function prepareContentForPDF(element) {
-    // Store original styles to restore later
-    element.dataset.originalOverflow = element.style.overflow || "";
-    element.dataset.originalHeight = element.style.height || "";
-    element.dataset.originalPosition = element.style.position || "";
-
-    // Apply styles that help with PDF generation
-    element.style.overflow = "visible";
-    element.style.height = "auto";
-    element.style.position = "relative";
-
-    // Find all report pages
-    const reportPages = element.querySelectorAll(".report-page");
-
-    // Ensure each page has explicit page breaks
-    reportPages.forEach((page, index) => {
-      // Store original styles
-      page.dataset.originalPageBreak = page.style.pageBreakAfter || "";
-
-      // Set explicit page break after each page except the last
-      if (index < reportPages.length - 1) {
-        page.style.pageBreakAfter = "always";
-      }
-
-      // Ensure proper sizing and margins
-      page.style.width = "8.5in";
-      page.style.minHeight = "11in";
-      page.style.boxSizing = "border-box";
-      page.style.position = "relative";
-      page.style.overflow = "hidden";
-    });
-
-    // Fix image loading issues
-    const images = element.querySelectorAll("img");
-    images.forEach((img) => {
-      if (!img.complete) {
-        img.loading = "eager"; // Force eager loading
-      }
-    });
-  }
-
-  /**
-   * Restore content styles after PDF generation
-   * @param {HTMLElement} element - The container element
-   */
-  function restoreContentAfterPDF(element) {
-    // Restore original styles
-    element.style.overflow = element.dataset.originalOverflow || "";
-    element.style.height = element.dataset.originalHeight || "";
-    element.style.position = element.dataset.originalPosition || "";
-
-    // Find all report pages and restore them
-    const reportPages = element.querySelectorAll(".report-page");
-    reportPages.forEach((page) => {
-      // Restore original page break style
-      page.style.pageBreakAfter = page.dataset.originalPageBreak || "";
-    });
-  }
-
-  /**
-   * Print the report with improved handling
-   */
-  function printReport() {
-    // Get the content container
-    const element = document.getElementById("pdfContainer");
-
-    // Prepare the content for printing
-    prepareContentForPrinting(element);
-
-    // Use a timeout to ensure styles are applied
-    setTimeout(() => {
-      // Open print dialog
-      window.print();
-
-      // Restore content after short delay to allow print dialog to open
-      setTimeout(() => {
-        restoreContentAfterPrinting(element);
-      }, 1000);
-    }, 100);
-  }
-
-  /**
-   * Prepare content for printing
-   * @param {HTMLElement} element - The container element
-   */
-  function prepareContentForPrinting(element) {
-    // Create a style element for print-specific styles
-    const printStyles = document.createElement("style");
-    printStyles.id = "print-specific-styles";
-    printStyles.textContent = `
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      #pdfViewerModal, #pdfViewerModal * {
-        visibility: visible;
-      }
-      #pdfViewerModal {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-      }
-      .pdf-modal .modal-content {
-        width: 100% !important;
-        max-width: none !important;
-        max-height: none !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-      }
-      .pdf-container {
-        max-height: none !important;
-        overflow: visible !important;
-      }
-      .report-page {
-        page-break-after: always;
-        margin: 0 !important;
-        padding: 0.5in !important;
-        box-shadow: none !important;
-      }
-      .report-page:last-child {
-        page-break-after: auto;
-      }
-      .pdf-controls, .close-modal {
-        display: none !important;
-      }
-      h2 {
-        display: none !important;
-      }
-    }
-  `;
-    document.head.appendChild(printStyles);
-
-    // Apply same fixes as PDF generation
-    prepareContentForPDF(element);
-  }
-
-  /**
-   * Restore content after printing
-   * @param {HTMLElement} element - The container element
-   */
-  function restoreContentAfterPrinting(element) {
-    // Remove print styles
-    const printStyles = document.getElementById("print-specific-styles");
-    if (printStyles) {
-      document.head.removeChild(printStyles);
-    }
-
-    // Restore content
-    restoreContentAfterPDF(element);
   }
 
   /**
@@ -1048,7 +1456,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Calculate potential loss (very simplified)
     const potentialLoss =
-      (jobValue * appointments * (latenessPercent / 100)) / 4; // Divide by 4 to scale down
+      (jobValue * appointments * (latenessPercent / 100)) / 4;
 
     // Get the flames elements
     const flamesContainer = document.querySelector(".flames-container");
@@ -1057,7 +1465,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const flame3 = document.querySelector(".flame-3");
 
     if (!flame1 || !flame2 || !flame3) {
-      return; // Early return if elements don't exist
+      return;
     }
 
     // Update flames intensity based on potential loss
@@ -1094,8 +1502,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Also affect the money bills
     const moneyBills = document.querySelectorAll(".money-bill");
     if (moneyBills.length > 0) {
-      // Make the money bills move faster with higher values
-      const animationDuration = Math.max(0.5, 3 - potentialLoss / 10000); // Between 0.5s and 3s
+      const animationDuration = Math.max(0.5, 3 - potentialLoss / 10000);
       moneyBills.forEach((bill) => {
         bill.style.animationDuration = `${animationDuration}s`;
       });
@@ -1184,7 +1591,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 1000);
 
     setTimeout(() => {
-      // Annual loss already updated
       document.querySelectorAll(".metric-card")[1].classList.add("animate");
     }, 1200);
 

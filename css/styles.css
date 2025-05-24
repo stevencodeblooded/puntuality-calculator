@@ -1297,3 +1297,581 @@ button {
         margin-bottom: 0.5rem;
     }
 }
+
+
+/* Additional Modal Styles for Report Viewing */
+
+/* Report Modal Specific Styles */
+.report-modal {
+    z-index: 2000; /* Higher than regular modal */
+}
+
+.report-modal-content {
+    max-width: 90vw;
+    width: 900px;
+    max-height: 95vh;
+    margin: 2% auto;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--light);
+    background-color: var(--lightest);
+    flex-shrink: 0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--primary-dark);
+    font-size: 1.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.print-button {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.print-button:hover {
+    background-color: var(--secondary-dark);
+    transform: translateY(-1px);
+}
+
+.close-report-modal {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--medium);
+    cursor: pointer;
+    padding: 0.5rem;
+    line-height: 1;
+}
+
+.close-report-modal:hover {
+    color: var(--dark);
+}
+
+.report-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    background-color: white;
+}
+
+/* Report Content Styles */
+.pdf-section {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--light);
+}
+
+.pdf-section:last-child {
+    border-bottom: none;
+}
+
+.page-break {
+    margin: 3rem 0;
+    border-top: 2px dashed var(--medium-light);
+    text-align: center;
+    position: relative;
+}
+
+.page-break::after {
+    content: "Page Break";
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    padding: 0 1rem;
+    color: var(--medium);
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+/* Report Typography */
+.report-content h1 {
+    color: #14316a;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+}
+
+.report-content h2 {
+    color: #14316a;
+    font-size: 1.4rem;
+    margin: 1.5rem 0 1rem 0;
+}
+
+.report-content h3 {
+    color: #14316a;
+    font-size: 1.2rem;
+    margin: 1.2rem 0 0.8rem 0;
+}
+
+.report-content p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.report-content ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.report-content li {
+    margin-bottom: 0.8rem;
+    line-height: 1.5;
+}
+
+/* Responsive Design for Report Modal */
+@media (max-width: 768px) {
+    .report-modal-content {
+        width: 95vw;
+        max-width: 95vw;
+        margin: 1% auto;
+    }
+    
+    .modal-header {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .modal-actions {
+        justify-content: space-between;
+    }
+    
+    .report-content {
+        padding: 1rem;
+    }
+    
+    .report-content h1 {
+        font-size: 1.5rem;
+    }
+    
+    .report-content h2 {
+        font-size: 1.3rem;
+    }
+}
+
+/* Print styles for the report */
+@media print {
+    .modal-header,
+    .modal-actions,
+    .close-report-modal,
+    .print-button {
+        display: none !important;
+    }
+    
+    .report-modal-content {
+        max-width: none;
+        width: auto;
+        max-height: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+    }
+    
+    .report-content {
+        padding: 0;
+        overflow: visible;
+    }
+    
+    .pdf-section {
+        page-break-after: always;
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .pdf-section:last-child {
+        page-break-after: auto;
+    }
+    
+    .page-break {
+        display: none;
+    }
+    
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
+
+/* Animation for modal appearance */
+.report-modal {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.report-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.report-modal .modal-content {
+    transform: translateY(-30px);
+    transition: transform 0.3s ease;
+}
+
+.report-modal.show .modal-content {
+    transform: translateY(0);
+}
+
+/* Enhanced scrollbar for report content */
+.report-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.report-content::-webkit-scrollbar-track {
+    background: var(--light);
+    border-radius: 4px;
+}
+
+.report-content::-webkit-scrollbar-thumb {
+    background: var(--medium-light);
+    border-radius: 4px;
+}
+
+.report-content::-webkit-scrollbar-thumb:hover {
+    background: var(--medium);
+}
+
+/* Loading state for report generation */
+.report-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+}
+
+.report-loading .spinner {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 1rem;
+}
+
+.report-loading p {
+    color: var(--medium-dark);
+    font-size: 1.1rem;
+}
+
+/* Report content highlights */
+.report-content .highlight {
+    background-color: #fff3cd;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+.report-content .red-highlight {
+    color: #c00;
+    font-weight: bold;
+}
+
+.report-content .green-highlight {
+    color: #3dc475;
+    font-weight: bold;
+}
+
+.report-content .blue-highlight {
+    color: #14316a;
+    font-weight: bold;
+}
+
+/* Badge styling in report */
+.trust-badge {
+    display: inline-block;
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #2255a4, #4a80d4);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    margin: 1rem auto;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.trust-badge .badge-text {
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+.trust-badge .badge-highlight {
+    color: #ffcc00;
+    font-size: 10px;
+}
+
+/* CTA button styling in report */
+.report-cta-button {
+    display: inline-block;
+    background-color: #16a34a;
+    color: white;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.report-cta-button:hover {
+    background-color: #15803d;
+    text-decoration: none;
+    color: white;
+}
+
+/* Price styling in report */
+.price-highlight {
+    font-size: 1.2em;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.original-price {
+    text-decoration: line-through;
+    color: #888;
+    margin-right: 10px;
+}
+
+.sale-price {
+    color: #16a34a;
+    font-weight: bold;
+    font-size: 1.3em;
+}
+
+/* Footer styling for report */
+.report-footer {
+    background-color: #4a80d4;
+    color: white;
+    padding: 15px 20px;
+    margin-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.report-footer a {
+    color: white;
+    text-decoration: none;
+}
+
+.report-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Testimonial styling in report */
+.testimonial-box {
+    background-color: var(--light);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin: 1.5rem 0;
+    border-left: 4px solid var(--secondary-color);
+}
+
+.testimonial-box .quote {
+    font-style: italic;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.testimonial-box .attribution {
+    font-weight: bold;
+    color: var(--medium-dark);
+    text-align: right;
+}
+
+/* Star rating styling */
+.star-rating {
+    color: #ffd700;
+    font-size: 1.1em;
+    margin-right: 0.5rem;
+}
+
+.star-rating .empty-star {
+    color: #ddd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .report-modal-content {
+        width: 98vw;
+        height: 98vh;
+        margin: 1vh auto;
+        border-radius: 0;
+    }
+    
+    .modal-header {
+        padding: 0.75rem;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .print-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .report-content {
+        padding: 0.75rem;
+    }
+    
+    .trust-badge {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+/* Enhanced PDF Footer Styles for Print */
+.pdf-footer {
+    background-color: #4a80d4;
+    color: white;
+    padding: 15px 20px;
+    margin-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.pdf-footer a {
+    color: white;
+    text-decoration: none;
+}
+
+.pdf-footer a:hover {
+    text-decoration: underline;
+}
+
+.pdf-footer span {
+    display: inline-block;
+}
+
+/* Enhanced Print Styles */
+@media print {
+    /* Force color printing */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+    
+    /* Page setup */
+    @page {
+        margin: 0.75in;
+        size: letter;
+    }
+    
+    /* PDF Section with footer space */
+    .pdf-section {
+        position: relative;
+        min-height: calc(100vh - 120px);
+        padding-bottom: 80px;
+        page-break-after: always;
+        page-break-inside: avoid;
+    }
+    
+    .pdf-section:last-child {
+        page-break-after: auto;
+    }
+    
+    /* Footer positioning - try multiple approaches */
+    .pdf-footer {
+        position: absolute !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        background-color: #4a80d4 !important;
+        color: white !important;
+        margin: 0 !important;
+        padding: 15px 20px !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        font-size: 12px !important;
+        font-weight: bold !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        z-index: 999 !important;
+    }
+    
+    .pdf-footer a {
+        color: white !important;
+        text-decoration: none !important;
+    }
+    
+    .pdf-footer span {
+        color: white !important;
+    }
+    
+    /* Alternative footer approach using ::after pseudo-element */
+    .pdf-section::after {
+        content: "";
+        position: fixed;
+        bottom: 0.75in;
+        left: 0.75in;
+        right: 0.75in;
+        height: 40px;
+        background-color: #4a80d4;
+        z-index: 1000;
+    }
+    
+    /* Hide page break indicators */
+    .page-break {
+        display: none !important;
+    }
+}
+
+/* Alternative approach - running footer using CSS content */
+@media print {
+    @page {
+        @bottom-center {
+            content: "WWW.BYCONTRACTORSFORCONTRACTORS.COM | CONTACT@CONSUMERSTRUSTAWARD.COM";
+            font-size: 10px;
+            color: white;
+            background-color: #4a80d4;
+            padding: 10px;
+            width: 100%;
+        }
+    }
+}

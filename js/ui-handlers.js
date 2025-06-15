@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Create a hidden form
       const form = document.createElement("form");
       form.method = "POST";
-      form.action = "https://formsubmit.co/contact@consumerstrustaward.com";
+      form.action = "https://formsubmit.co/steven.ochieng432@gmail.com";
       form.style.display = "none";
       form.target = "hidden_iframe";
 
